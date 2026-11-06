@@ -5,8 +5,12 @@ cd "$(dirname "$0")/.."
 CONFIG="${1:-release}"
 APP="dist/Room.app"
 
-if ! out=$(./scripts/swiftw.sh build -c "$CONFIG" 2>&1); then echo "BUILD FAILED:" >&2; echo "$out" | grep -E "error" | head -8 >&2; exit 1; fi
-BIN="$(swift build -c "$CONFIG" --show-bin-path)"
+# Release builds are universal (Apple silicon + Intel); debug stays native for speed.
+ARCHS=()
+if [ "$CONFIG" = "release" ]; then ARCHS=(--arch arm64 --arch x86_64); fi
+
+if ! out=$(./scripts/swiftw.sh build -c "$CONFIG" ${ARCHS[@]+"${ARCHS[@]}"} 2>&1); then echo "BUILD FAILED:" >&2; echo "$out" | grep -E "error" | head -8 >&2; exit 1; fi
+BIN="$(swift build -c "$CONFIG" ${ARCHS[@]+"${ARCHS[@]}"} --show-bin-path)"
 
 rm -rf "$APP" && mkdir -p "$APP/Contents/MacOS" "$APP/Contents/Resources"
 cp "$BIN/Room" "$APP/Contents/MacOS/Room"
