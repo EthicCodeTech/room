@@ -520,6 +520,8 @@ extension Double { var i: Int64 { Int64(self) } }
         let a = await Assistant.answer("what is the largest file on my disk", advisor: RuleAdvisor(), context: ctx())
         #expect(a.text.contains("Gradle caches")); #expect(a.text.contains("GB"))
         #expect(!a.text.contains("#")); #expect(!a.text.contains("6217768960")); #expect(a.text.contains("Map"))
+        #expect(a.text.contains("It is safe to clear."), "reads as a sentence")
+        for tier in RiskTier.allCases { #expect(!Assistant.safetySentence(tier).contains("is can")) }
     }
 
     @Test func modelOutputIsCleanedAndBrokenOutputFallsBack() {
