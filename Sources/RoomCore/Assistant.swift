@@ -82,7 +82,7 @@ public enum Assistant {
     static func largest(_ c: AdvisorContext) -> String {
         let top = c.items.sorted { $0.bytes > $1.bytes }.prefix(3)
         guard let first = top.first else { return "Room hasn't found anything yet. Scan again in a moment, or open the Map to see your biggest folders." }
-        var text = "The biggest thing Room found is \(first.title), about \(ByteFormat.string(first.bytes)). It is \(safetyPhrase(first.tier))."
+        var text = "The biggest thing Room found is \(first.title), about \(ByteFormat.string(first.bytes)). \(safetySentence(first.tier))"
         let rest = top.dropFirst()
         if !rest.isEmpty { text += " Next: " + rest.map { "\($0.title) (\(ByteFormat.string($0.bytes)))" }.joined(separator: ", ") + "." }
         return text + " Room only lists what it can clean. To see the biggest folders on your whole disk, open the Map."
@@ -116,6 +116,15 @@ public enum Assistant {
         case .safe: "safe to clear"
         case .rebuildable: "can be rebuilt if you need it again"
         case .yours: "your own file, so only you can judge it"
+        }
+    }
+
+    /// A whole sentence, so it reads right wherever it lands ("It can be rebuilt..." rather than "It is can be rebuilt...").
+    public static func safetySentence(_ tier: RiskTier) -> String {
+        switch tier {
+        case .safe: "It is safe to clear."
+        case .rebuildable: "It can be rebuilt if you need it again."
+        case .yours: "It is your own file, so only you can judge it."
         }
     }
 
