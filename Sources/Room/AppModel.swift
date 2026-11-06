@@ -208,6 +208,9 @@ final class AppModel {
         Haptics.play(.attention)
     }
 
+    /// What happens to an item on delete, given the user's undo setting.
+    func policy(for c: Candidate) -> DeletionPolicy { .default(for: c, vaultRebuildable: settings.vaultRebuildable) }
+
     func confirmClean() {
         let items = selectedItems
         let confirmations = Confirmations(yours: confirmYours, unbackedRepo: confirmUnbacked,
@@ -216,8 +219,9 @@ final class AppModel {
         Task { while isCleaning { Haptics.play(.pending); try? await Task.sleep(for: .seconds(1.2)) } }      // a slow heartbeat while Room works
         let goalBefore = goalBytes
         let cleaner = Cleaner(vault: vault, log: log)
+        let vaultRebuildable = settings.vaultRebuildable
         Task {
-            let report = await Task.detached(priority: .userInitiated) { cleaner.execute(items, confirmations: confirmations) }.value
+            let report = await Task.detached(priority: .userInitiated) { cleaner.execute(items, confirmations: confirmations, policy: { DeletionPolicy.default(for: $0, vaultRebuildable: vaultRebuildable) }) }.value
             isCleaning = false; lastReport = report
             refreshDisk(); refreshVault()
             present(report, goal: goalBefore)

@@ -198,7 +198,6 @@
         {
           "id": "19d5a655-95c3-46d0-8160-7e29cb09e350",
           "scope": "project",
-          "report": "/Users/mrtag08/Projects/galaxys25/Room/brag-output/composition-vertical-vo/.hyperframes/artifacts/checks/19d5a655-95c3-46d0-8160-7e29cb09e350.json",
           "metadata": {
             "ok": true,
             "browserSkipped": false,
@@ -220,7 +219,9 @@
           "revision": "7160df9e-4b12-407d-a0f4-0f2540aba3ca",
           "inputFingerprint": "6b932c973d4b5aae0c944390d5953e45bdb4a661256a6ba7367a67ac7b5d4344",
           "inputScope": "local-project-files",
-          "attribution": "recorded-revision"
+          "attribution": "recorded-revision",
+          "status": "cleaned",
+          "cleanedAfterRender": "3f93dacd-7f2f-4a2a-a451-fefcb38a19c8"
         }
       ],
       "dd540f70-8dda-4310-9e84-6d1a8124badc": [
@@ -319,15 +320,15 @@
   },
   "renders": {
     "latest": {
-      "id": "2f8ca89e-1657-430e-86a2-2b39c35d901b",
-      "completedAt": 1793956460232,
-      "output": "/Users/mrtag08/Projects/galaxys25/Room/brag-output/brag-reels-voice-v3.mp4",
+      "id": "3f93dacd-7f2f-4a2a-a451-fefcb38a19c8",
+      "completedAt": 1793956596157,
+      "output": "/Users/mrtag08/Projects/galaxys25/Room/brag-output/brag-reels-voice-v4.mp4",
       "status": "completed",
-      "revision": "dd540f70-8dda-4310-9e84-6d1a8124badc"
+      "revision": "e266268d-073f-4390-8524-10df2401b699"
     },
     "retainedRevisions": [
-      "dd540f70-8dda-4310-9e84-6d1a8124badc",
-      "7160df9e-4b12-407d-a0f4-0f2540aba3ca"
+      "e266268d-073f-4390-8524-10df2401b699",
+      "dd540f70-8dda-4310-9e84-6d1a8124badc"
     ]
   },
   "pendingArtifactCleanup": []
