@@ -26,7 +26,7 @@ VENV=".build/dmgvenv"
 [ -x "$VENV/bin/dmgbuild" ] || { python3 -m venv "$VENV" && "$VENV/bin/pip" install -q dmgbuild; }
 BG="$(mktemp -d)/background.tiff"
 tiffutil -cathidpicheck Brand/room-dmg-background.png Brand/room-dmg-background@2x.png -out "$BG" 2>/dev/null
-"$VENV/bin/dmgbuild" -s scripts/dmg-settings.py -D app="$APP" -D bg="$BG" -D icon=Brand/Room.icns "Room" "$DMG" >/dev/null
+"$VENV/bin/dmgbuild" -s scripts/dmg-settings.py -D app="$APP" -D bg="$BG" -D icon=Brand/RoomVolume.icns "Room" "$DMG" >/dev/null
 [ -n "${DEVELOPER_ID:-}" ] && codesign --force --timestamp --sign "$DEVELOPER_ID" "$DMG"
 
 echo

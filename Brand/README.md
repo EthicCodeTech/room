@@ -30,3 +30,5 @@ room-about.png      About window artwork (600 x 340 @2x)
 RULES
 One sindoor dot (the doorknob). Never recolour it except in single-colour
 versions. Keep the floor line: it grounds the mark at small sizes.
+
+RoomVolume.icns   Disk image volume icon: the dark tile, so it stays visible in a light Finder title bar.
