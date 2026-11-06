@@ -2,7 +2,7 @@
 
 Room makes space on your Mac, and tells you exactly what it will do first.
 
-It finds what is safe to remove (caches, build output, old simulators, stale `node_modules`, Docker and VM leftovers), shows a size map of the rest, and cleans only after you approve. Your own files (installers, zips, anything you confirm) wait in an undo vault for 7 days. Caches and rebuildable folders such as `node_modules` are removed right away, because they come back by themselves.
+It finds what is safe to remove (caches, build output, old simulators, stale `node_modules`, Docker and VM leftovers), shows a size map of the rest, and cleans only after you approve. Your own files (installers, zips, anything you confirm) wait in an undo vault for 7 days. Caches are removed right away because they come back by themselves, and so are rebuildable folders such as `node_modules` unless you turn on "Keep rebuildable folders in the vault too" in Settings.
 
 A product of [EthicCode](https://ethiccode.in/room), built on the [Cinnabar](https://ethiccode.in/cinnabar) design system.
 
@@ -21,7 +21,7 @@ A product of [EthicCode](https://ethiccode.in/room), built on the [Cinnabar](htt
 
 - **Review**: ranked, tiered suggestions with the reason for each. Nothing is selected for you in the risky tiers.
 - **Map**: a fast treemap of any folder. Click to descend, hover for details.
-- **Undo vault**: your own files, installers and zips are moved here for 7 days and can be restored in one click. Caches and rebuildable folders are deleted directly.
+- **Undo vault**: your own files, installers and zips are moved here for 7 days and can be restored in one click. Caches are deleted directly; rebuildable folders can be vaulted with a setting.
 - **Safety rails**: path safety checks, and a git guard that flags repos with uncommitted or unpushed work before anything near them is suggested.
 - **Liquid tank**: free space as water that follows your MacBook's tilt, using the built-in motion sensor.
 - **Cinnabar Glass**: Cinnabar's flat surfaces and hairlines mixed with macOS 26 Liquid Glass, in light and dark. See [docs/cinnabar-glass.md](docs/cinnabar-glass.md).

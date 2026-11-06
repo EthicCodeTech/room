@@ -144,6 +144,8 @@ struct SettingsView: View {
         section("Cleaning") {
             row("Stale projects") { DSSegmented(options: [(30, "30 days"), (60, "60 days"), (90, "90 days")], selection: $model.settings.staleProjectDays) }
             Text("node_modules in projects untouched this long are offered for removal.").dsText(Token.micro, color: DS.textFaint)
+            Toggle(isOn: $model.settings.vaultRebuildable) { Text("Keep rebuildable folders in the vault too").dsText(Token.small) }.toggleStyle(DSToggleStyle())
+            Text("Your files, installers and zips always wait in the vault for 7 days. Turn this on to also keep node_modules and similar folders there. Their space comes back when you empty the vault. Caches are always removed directly.").dsText(Token.micro, color: DS.textFaint).fixedSize(horizontal: false, vertical: true)
             row("Low space alert") { DSSegmented(options: [(10, "10 GB"), (15, "15 GB"), (25, "25 GB")], selection: $model.settings.lowSpaceAlertGB) }
         }
     }

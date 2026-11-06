@@ -45,6 +45,21 @@ import Foundation
         #expect(sb.exists("Downloads/app.zip"))
     }
 
+    @Test func theUndoSettingAlsoVaultsRebuildableFoldersButNeverCaches() throws {
+        let sb = try Sandbox(); let (cleaner, vault, _) = try make(sb)
+        let nm = try sb.file("proj/node_modules/pkg/index.js", bytes: 20_000).deletingLastPathComponent().deletingLastPathComponent()
+        let cache = try sb.file("Library/Caches/y/blob", bytes: 20_000)
+        let items = [sb.candidate("n", tier: .rebuildable, targets: [nm], ruleID: "detect.node_modules"), sb.candidate("c", tier: .safe, targets: [cache])]
+        let r = cleaner.execute(items, policy: { DeletionPolicy.default(for: $0, vaultRebuildable: true) })
+        #expect(r.results.map(\.status) == [.vaulted(days: 7), .deleted])
+        #expect(vault.list().count == 1)
+        #expect(DeletionPolicy.default(for: items[0]) == .immediate, "off by default")
+        var s = AppSettings(); s.vaultRebuildable = true
+        let back = try JSONDecoder().decode(AppSettings.self, from: JSONEncoder().encode(s))
+        #expect(back.vaultRebuildable)
+        #expect(try JSONDecoder().decode(AppSettings.self, from: Data("{}".utf8)).vaultRebuildable == false)
+    }
+
     @Test func confirmedYoursGoesToTheVaultAndRestoresExactly() throws {
         let sb = try Sandbox(); let (cleaner, vault, log) = try make(sb)
         let f = try sb.file("Downloads/precious.bin", bytes: 50_000)

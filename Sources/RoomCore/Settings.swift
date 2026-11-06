@@ -43,11 +43,13 @@ public struct AppSettings: Codable, Sendable, Equatable {
     /// Tilt the liquid with the Mac's accelerometer (undocumented sensor; Macs without it just keep a still tank).
     public var tiltEnabled = true
     public var tilt = TiltCalibration.none
+    /// Also keep node_modules and other rebuildable folders in the undo vault for 7 days (caches are always removed directly).
+    public var vaultRebuildable = false
     public init() {}
 
     private enum CodingKeys: String, CodingKey {
         case appearance, learningOptIn, learningConsentDate, advisorMode, staleProjectDays, lowSpaceAlertGB
-        case hapticLevel, haptics, tiltEnabled, tilt
+        case hapticLevel, haptics, tiltEnabled, tilt, vaultRebuildable
     }
 
     /// Every field is optional on disk. A settings file written by an older version must never fail to load,
@@ -62,6 +64,7 @@ public struct AppSettings: Codable, Sendable, Equatable {
         lowSpaceAlertGB = try c.decodeIfPresent(Int.self, forKey: .lowSpaceAlertGB) ?? 15
         tiltEnabled = try c.decodeIfPresent(Bool.self, forKey: .tiltEnabled) ?? true
         tilt = try c.decodeIfPresent(TiltCalibration.self, forKey: .tilt) ?? .none
+        vaultRebuildable = try c.decodeIfPresent(Bool.self, forKey: .vaultRebuildable) ?? false
         // Older builds had a single on/off switch.
         let legacyOn = try c.decodeIfPresent(Bool.self, forKey: .haptics)
         hapticLevel = try c.decodeIfPresent(HapticLevel.self, forKey: .hapticLevel) ?? (legacyOn == false ? .off : .standard)
@@ -74,6 +77,7 @@ public struct AppSettings: Codable, Sendable, Equatable {
         try c.encode(advisorMode, forKey: .advisorMode); try c.encode(staleProjectDays, forKey: .staleProjectDays)
         try c.encode(lowSpaceAlertGB, forKey: .lowSpaceAlertGB); try c.encode(hapticLevel, forKey: .hapticLevel)
         try c.encode(tiltEnabled, forKey: .tiltEnabled); try c.encode(tilt, forKey: .tilt)
+        try c.encode(vaultRebuildable, forKey: .vaultRebuildable)
     }
 }
 
