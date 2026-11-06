@@ -1,6 +1,10 @@
 # Room for Windows: plan
 
-Status: proposal. Nothing here is built yet. Target: ship together with Room 1.2 (see [v1.2-plan.md](v1.2-plan.md)).
+Status: **in progress.** Decided: Rust engine + Tauri 2 shell (option A below), styled to match Windows 11 with the Cinnabar design system. A first build of the engine and app exists in [`windows/`](../windows). Target: ship together with Room 1.2 (see [v1.2-plan.md](v1.2-plan.md)).
+
+**Design direction (decided):** each platform follows its own OS look, in Cinnabar's colours and type. On the Mac that is Liquid Glass. On Windows it is Windows 11: Mica backdrop, a left navigation pane, 4 px controls and 8 px surfaces, a 2 px focus ring, light and dark following the system. Sindoor stays the accent, Parkinsans the display face, JetBrains Mono the numbers.
+
+**Risk call (decided):** cloud placeholders and offline files are handled by detection (they count as nothing and are never deleted blindly), not treated as a blocker. The two engines are allowed to differ in code; the shared catalog, fixtures and record schema keep them honest.
 
 ## 1. Goal and non-goals
 
