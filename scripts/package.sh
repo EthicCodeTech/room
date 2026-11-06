@@ -20,12 +20,13 @@ ZIP="dist/Room-$VERSION.zip"; DMG="dist/Room-$VERSION.dmg"
 rm -f "$ZIP" "$DMG"
 ditto -c -k --sequesterRsrc --keepParent "$APP" "$ZIP"
 
-STAGE="$(mktemp -d)/Room"
-mkdir -p "$STAGE"
-cp -R "$APP" "$STAGE/Room.app"
-ln -s /Applications "$STAGE/Applications"
-cp scripts/dmg-readme.txt "$STAGE/Read me first.txt"
-hdiutil create -volname "Room" -srcfolder "$STAGE" -ov -format UDZO "$DMG" >/dev/null
+# The disk image: Room on the left, Applications on the right, over the brand background.
+# dmgbuild writes the window layout directly (no Finder scripting); it lives in a local venv.
+VENV=".build/dmgvenv"
+[ -x "$VENV/bin/dmgbuild" ] || { python3 -m venv "$VENV" && "$VENV/bin/pip" install -q dmgbuild; }
+BG="$(mktemp -d)/background.tiff"
+tiffutil -cathidpicheck Brand/room-dmg-background.png Brand/room-dmg-background@2x.png -out "$BG" 2>/dev/null
+"$VENV/bin/dmgbuild" -s scripts/dmg-settings.py -D app="$APP" -D bg="$BG" -D icon=Brand/Room.icns "Room" "$DMG" >/dev/null
 [ -n "${DEVELOPER_ID:-}" ] && codesign --force --timestamp --sign "$DEVELOPER_ID" "$DMG"
 
 echo
