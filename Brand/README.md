@@ -32,3 +32,5 @@ One sindoor dot (the doorknob). Never recolour it except in single-colour
 versions. Keep the floor line: it grounds the mark at small sizes.
 
 RoomVolume.icns   Disk image volume icon: the dark tile, so it stays visible in a light Finder title bar.
+
+Room.icon         Icon Composer source used by scripts/bundle.sh (compiled with actool). One design for light and dark: the light door on the dark tile, so it stays legible when macOS darkens icons. Room.icns is the original flat export, kept for reference.

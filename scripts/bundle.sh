@@ -12,7 +12,12 @@ rm -rf "$APP" && mkdir -p "$APP/Contents/MacOS" "$APP/Contents/Resources"
 cp "$BIN/Room" "$APP/Contents/MacOS/Room"
 cp -R Sources/Room/Resources/Fonts "$APP/Contents/Resources/Fonts"
 
-cp Brand/Room.icns "$APP/Contents/Resources/AppIcon.icns"
+# Icon Composer bundle -> Assets.car (light and dark appearances) + Room.icns for older readers.
+ICON_OUT="$(mktemp -d)"
+xcrun actool "$PWD/Brand/Room.icon" --compile "$ICON_OUT" --output-format human-readable-text --notices --warnings --errors \
+  --output-partial-info-plist "$ICON_OUT/partial.plist" --app-icon Room --include-all-app-icons \
+  --enable-on-demand-resources NO --development-region en --target-device mac --minimum-deployment-target 26.0 --platform macosx >/dev/null
+cp "$ICON_OUT/Assets.car" "$ICON_OUT/Room.icns" "$APP/Contents/Resources/"
 cp Brand/RoomMenuBarTemplate.png Brand/RoomMenuBarTemplate@2x.png Brand/RoomMenuBarTemplate@3x.png "$APP/Contents/Resources/"
 
 cat > "$APP/Contents/Info.plist" << PLIST
@@ -23,7 +28,8 @@ cat > "$APP/Contents/Info.plist" << PLIST
   <key>CFBundleName</key><string>Room</string>
   <key>CFBundleDisplayName</key><string>Room</string>
   <key>CFBundleExecutable</key><string>Room</string>
-  <key>CFBundleIconFile</key><string>AppIcon</string>
+  <key>CFBundleIconFile</key><string>Room</string>
+  <key>CFBundleIconName</key><string>Room</string>
   <key>CFBundlePackageType</key><string>APPL</string>
   <key>CFBundleShortVersionString</key><string>1.0.0</string>
   <key>CFBundleVersion</key><string>1</string>
