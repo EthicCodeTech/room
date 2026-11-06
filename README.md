@@ -51,4 +51,4 @@ Developer ID signing and notarization read `DEVELOPER_ID` and `NOTARY_PROFILE` f
 
 ## Status
 
-v1.0.0. Private for now.
+v1.0.0. Download it from the [latest release](../../releases/latest) or at [ethiccode.in/room](https://ethiccode.in/room).
