@@ -361,12 +361,12 @@ extension Double { var i: Int64 { Int64(self) } }
     }
 
     @Test func remoteContextNeverContainsNamesOrPaths() throws {
-        let c = cand("id1", "node_modules: SecLeafCTF")
-        let redacted = AdvisorContext(candidates: [c], free: 1, total: 2, growth: [GrowthDelta(name: "Projects/SecLeafCTF", delta: 5)], redactNames: true)
+        let c = cand("id1", "node_modules: ExampleProject")
+        let redacted = AdvisorContext(candidates: [c], free: 1, total: 2, growth: [GrowthDelta(name: "Projects/ExampleProject", delta: 5)], redactNames: true)
         let json = String(data: try JSONEncoder().encode(redacted), encoding: .utf8)!
-        #expect(!json.contains("SecLeafCTF")); #expect(!json.contains("Secret")); #expect(!json.contains("~/"))
+        #expect(!json.contains("ExampleProject")); #expect(!json.contains("Secret")); #expect(!json.contains("~/"))
         let local = AdvisorContext(candidates: [c], free: 1, total: 2, redactNames: false)
-        #expect(String(data: try JSONEncoder().encode(local), encoding: .utf8)!.contains("SecLeafCTF"))
+        #expect(String(data: try JSONEncoder().encode(local), encoding: .utf8)!.contains("ExampleProject"))
         #expect(AdvisorFactory.shouldRedact(.claude)); #expect(!AdvisorFactory.shouldRedact(.onDevice))
     }
 

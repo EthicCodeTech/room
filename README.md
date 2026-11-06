@@ -13,9 +13,29 @@ A product of [EthicCode](https://ethiccode.in/room), built on the [Cinnabar](htt
 
 ## Install
 
-1. Download `Room-1.0.0.dmg` from the [latest release](../../releases/latest).
-2. Drag Room to Applications.
-3. The build is ad-hoc signed, not notarized yet. On first launch macOS will refuse to open it. Go to **System Settings → Privacy & Security**, scroll to the message about Room and choose **Open Anyway**.
+Room isn't notarized by Apple yet, so your Mac asks you to confirm once. It takes about a minute.
+
+1. Download `Room-1.0.0.dmg` from the [latest release](../../releases/latest), open it, and drag Room into Applications.
+
+   ![The Room disk image](docs/screenshots/install-1-drag-to-applications.png)
+
+2. Open Room. macOS says it can't verify it. That's expected. Click **Done** (not Move to Trash).
+
+   ![The "Room Not Opened" dialog](docs/screenshots/install-2-not-opened.png)
+
+3. Open **System Settings → Privacy & Security**, scroll to **Security**, and click **Open Anyway** next to "Room was blocked". If you don't see it, open Room once more and come back. The button stays for about an hour.
+
+   ![Open Anyway in Privacy & Security](docs/screenshots/install-3-open-anyway.png)
+
+4. Confirm with your password or Touch ID, then click **Open**. You won't be asked again. The first time Room looks in Desktop, Documents or Downloads, choose **Allow** so it can measure them.
+
+## Screenshots
+
+![Overview](docs/screenshots/overview.png)
+
+![Map (sample data)](docs/screenshots/map.png)
+
+![Vault (sample data)](docs/screenshots/vault.png)
 
 ## What is in it
 
