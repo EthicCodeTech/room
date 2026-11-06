@@ -45,7 +45,7 @@ Developer ID signing and notarization read `DEVELOPER_ID` and `NOTARY_PROFILE` f
 | --- | --- |
 | `Sources/RoomCore` | Engine: scanner, planner, cleaner, vault, safety rails, settings |
 | `Sources/Room` | SwiftUI app and the Cinnabar design system code |
-| `Sources/room-icon` | Generates the app icon |
+| `Brand` | Room logo, app icon, menu bar icon, DMG and web artwork |
 | `Tests/RoomCoreTests` | Swift Testing suites |
 | `scripts` | Build, package, notarize, test helpers |
 

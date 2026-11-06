@@ -12,12 +12,33 @@ struct ECMark: Shape {
     }
 }
 
-/// The static logo: the "ec" with the sindoor dot at rest on the tip of the c.
-struct LogoMark: View {
+/// The Room mark: a doorway with one sindoor doorknob. Drawn on the 48-unit grid of the brand SVGs.
+struct RoomMark: View {
     var height: CGFloat = 24
     var body: some View {
-        SparkTraceLoader(isRunning: false, height: height)
+        let k = height / 48
+        ZStack(alignment: .topLeading) {
+            Path { p in
+                p.move(to: CGPoint(x: 14, y: 42)); p.addLine(to: CGPoint(x: 14, y: 10))
+                p.addArc(tangent1End: CGPoint(x: 14, y: 6), tangent2End: CGPoint(x: 18, y: 6), radius: 4)
+                p.addLine(to: CGPoint(x: 30, y: 6))
+                p.addArc(tangent1End: CGPoint(x: 34, y: 6), tangent2End: CGPoint(x: 34, y: 10), radius: 4)
+                p.addLine(to: CGPoint(x: 34, y: 42))
+                p.move(to: CGPoint(x: 8, y: 42)); p.addLine(to: CGPoint(x: 40, y: 42))
+            }
+            .applying(CGAffineTransform(scaleX: k, y: k))
+            .stroke(DS.text, style: StrokeStyle(lineWidth: 4 * k, lineCap: .round, lineJoin: .round))
+            Circle().fill(DS.sindoor).frame(width: 6.4 * k, height: 6.4 * k).offset(x: (28 - 3.2) * k, y: (25 - 3.2) * k)
+        }
+        .frame(width: height, height: height, alignment: .topLeading)
+        .accessibilityElement().accessibilityLabel("Room")
     }
+}
+
+/// The static logo used in chrome, settings and the menu panel.
+struct LogoMark: View {
+    var height: CGFloat = 24
+    var body: some View { RoomMark(height: height) }
 }
 
 /// The official loader. The dot leaves its resting place, circles the outline at constant speed, and lands home.

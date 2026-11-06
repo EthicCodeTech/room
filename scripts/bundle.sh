@@ -12,9 +12,8 @@ rm -rf "$APP" && mkdir -p "$APP/Contents/MacOS" "$APP/Contents/Resources"
 cp "$BIN/Room" "$APP/Contents/MacOS/Room"
 cp -R Sources/Room/Resources/Fonts "$APP/Contents/Resources/Fonts"
 
-ICONSET="$(mktemp -d)/AppIcon.iconset"
-"$BIN/room-icon" "$ICONSET" everyday >/dev/null
-iconutil -c icns "$ICONSET" -o "$APP/Contents/Resources/AppIcon.icns"
+cp Brand/Room.icns "$APP/Contents/Resources/AppIcon.icns"
+cp Brand/RoomMenuBarTemplate.png Brand/RoomMenuBarTemplate@2x.png Brand/RoomMenuBarTemplate@3x.png "$APP/Contents/Resources/"
 
 cat > "$APP/Contents/Info.plist" << PLIST
 <?xml version="1.0" encoding="UTF-8"?>

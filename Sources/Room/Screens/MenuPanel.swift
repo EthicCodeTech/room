@@ -1,10 +1,20 @@
 import SwiftUI
+import AppKit
 import RoomCore
+
+enum MenuBarIcon {
+    /// The door, as a template image so macOS tints it for light and dark menu bars. Absent when run outside the app bundle.
+    static let image: NSImage? = {
+        guard let img = NSImage(named: "RoomMenuBarTemplate") else { return nil }   // finds the @2x and @3x files too
+        img.size = NSSize(width: 18, height: 18); img.isTemplate = true; return img
+    }()
+}
 
 struct MenuLabel: View {
     let model: AppModel
     var body: some View {
         HStack(spacing: 4) {
+            if let door = MenuBarIcon.image { Image(nsImage: door) }
             if model.isLow { Image(systemName: "circle.fill").font(.system(size: 6)).foregroundStyle(DS.sindoor) }   // "look here"
             Text(ByteFormat.string(model.freeBytes)).font(.system(size: 12, weight: .medium, design: .monospaced))
         }
