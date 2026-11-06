@@ -232,12 +232,9 @@ fn discovery_finds_caches_stale_projects_installers_and_big_old_files() {
     file(&env.home, "Downloads/tool-setup.msi", 40_000);
     file(&env.home, "Downloads/pack.zip", 30_000);
     fs::create_dir_all(env.home.join("Downloads/pack")).unwrap();
-    for p in ["Projects/old-app", "Projects/old-app/package.json"] {
-        let t = std::time::SystemTime::now() - std::time::Duration::from_secs(200 * 86_400);
-        fs::File::open(env.home.join(p)).unwrap().set_modified(t).unwrap();
-    }
-    let old = std::time::SystemTime::now() - std::time::Duration::from_secs(30 * 86_400);
-    fs::File::open(env.home.join("Downloads/tool-setup.msi")).unwrap().set_modified(old).unwrap();
+    let ago = |days: u64| filetime::FileTime::from_system_time(std::time::SystemTime::now() - std::time::Duration::from_secs(days * 86_400));
+    for p in ["Projects/old-app", "Projects/old-app/package.json"] { filetime::set_file_mtime(env.home.join(p), ago(200)).unwrap(); }   // works on folders on Windows too
+    filetime::set_file_mtime(env.home.join("Downloads/tool-setup.msi"), ago(30)).unwrap();
     let mut opts = Options::new(env.clone());
     opts.min_bytes = 1;
     opts.check_running_apps = false;
