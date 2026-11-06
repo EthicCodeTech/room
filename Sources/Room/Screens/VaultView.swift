@@ -31,12 +31,22 @@ struct VaultView: View {
         .onAppear { model.refreshVault() }
     }
 
+    /// Where a batch lives when it isn't simply in the main vault.
+    private func location(_ b: VaultManifest) -> String? {
+        let drives = b.driveNames.map { "“\($0)”" }.joined(separator: ", ")
+        if !drives.isEmpty && !model.vault.isAvailable(b) { return "On \(drives). Connect the drive to restore or delete it." }
+        if !drives.isEmpty { return "Kept on \(drives), so nothing was copied." }
+        if b.usesTrash { return "This drive can't hold a vault, so these items are in the Trash." }
+        return nil
+    }
+
     private func batch(_ b: VaultManifest) -> some View {
         DSCard(padding: 20, interactive: true) {
             HStack(alignment: .center, spacing: 16) {
                 VStack(alignment: .leading, spacing: 6) {
                     Text(b.label).dsText(Token.h4).lineLimit(1)
                     Text("\(b.entries.count) item\(b.entries.count == 1 ? "" : "s"), deleted \(b.created.formatted(date: .abbreviated, time: .shortened))").dsText(Token.small, color: DS.textMuted)
+                    if let note = location(b) { Text(note).dsText(Token.small, color: DS.textMuted) }
                 }
                 Spacer()
                 DSBadge(text: b.expires.countdown(), dot: DS.pending)
