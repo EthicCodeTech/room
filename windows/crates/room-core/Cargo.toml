@@ -1,0 +1,21 @@
+[package]
+name = "room-core"
+version.workspace = true
+edition.workspace = true
+description = "Room's engine: scan, rules, scoring, planner, undo vault and safety rails. Portable, with a thin Windows layer."
+
+[dependencies]
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+rayon = "1"
+glob = "0.3"
+dirs = "5"
+uuid = { version = "1", features = ["v4"] }
+fs4 = "0.9"
+trash = "5"
+
+[target.'cfg(windows)'.dependencies]
+windows-sys = { version = "0.59", features = ["Win32_Foundation", "Win32_Storage_FileSystem", "Win32_UI_Shell", "Win32_System_Threading"] }
+
+[dev-dependencies]
+tempfile = "3"

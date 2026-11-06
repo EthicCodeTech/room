@@ -1,0 +1,27 @@
+[package]
+name = "room"
+version.workspace = true
+edition.workspace = true
+description = "Room for Windows: make space on your PC, and know what it will do first."
+license.workspace = true
+
+[lib]
+name = "room_app_lib"
+crate-type = ["rlib"]
+
+[[bin]]
+name = "room"
+path = "src/main.rs"
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+tauri = { version = "2", features = [] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+room-core = { path = "../../crates/room-core" }
+dirs = "5"
+
+[target.'cfg(windows)'.dependencies]
+window-vibrancy = "0.5"

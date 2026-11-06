@@ -1,0 +1,8 @@
+{
+  "name": "room-windows",
+  "private": true,
+  "version": "1.2.0",
+  "description": "Room for Windows. Build tooling only; the app itself is Rust (src-tauri) and plain HTML/CSS/JS (ui).",
+  "scripts": { "tauri": "tauri" },
+  "devDependencies": { "@tauri-apps/cli": "^2" }
+}
