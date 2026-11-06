@@ -273,9 +273,10 @@ final class AppModel {
 
     func deleteBatchNow(_ batch: VaultManifest) {
         let before = FreeSpace.available()
-        vault.purge(batch.id)
+        let done = vault.purge(batch.id)
         refreshVault(); refreshDisk()
-        toasts.show(.success, "Deleted \(batch.label)", detail: "Measured: \(ByteFormat.string(max(0, FreeSpace.available() - before))) returned")
+        if done { toasts.show(.success, "Deleted \(batch.label)", detail: "Measured: \(ByteFormat.string(max(0, FreeSpace.available() - before))) returned") }
+        else { toasts.show(.failed, "\(batch.label) is on a drive that isn't connected", detail: "Connect \(batch.driveNames.joined(separator: ", ")) and try again.") }
     }
 
     // MARK: Growth
@@ -452,13 +453,8 @@ final class AppModel {
         Haptics.play(.pending)
         let adv = advisor, ctx = context()
         Task {
-            do {
-                let a = try await adv.answer(q, context: ctx)
-                messages.append(.init(role: .assistant, text: a, source: adv.name)); Haptics.play(.confirm)
-            } catch {
-                let fallback = (try? await RuleAdvisor().answer(q, context: ctx)) ?? ""
-                messages.append(.init(role: .assistant, text: "The assistant couldn't answer just now, so here is what the built-in rules say. " + fallback, source: "Built-in rules"))
-            }
+            let a = await Assistant.answer(q, advisor: adv, context: ctx)
+            messages.append(.init(role: .assistant, text: a.text, source: a.source)); Haptics.play(.confirm)
             isAsking = false
         }
     }
@@ -476,7 +472,7 @@ final class AppModel {
                 let valid = PlanValidator.validate(ids: proposal.ids, candidates: pool, allowYours: false)
                 let total = valid.reduce(Int64(0)) { $0 + $1.estimate.planning }
                 selection = Set(valid.map(\.id))
-                reply = "\(proposal.rationale) I ticked \(valid.count) item\(valid.count == 1 ? "" : "s") in Review, about \(ByteFormat.string(total))."
+                reply = "\(Assistant.clean(proposal.rationale, context: ctx)) I ticked \(valid.count) item\(valid.count == 1 ? "" : "s") in Review, about \(ByteFormat.string(total))."
                 if total < goal { reply += " That is \(ByteFormat.string(goal - total)) short of your goal, and the rest would have to come from files only you can judge." }
             } catch { reply = "The assistant couldn't plan just now. The goal card on Overview uses the built-in planner instead." }
             messages.append(.init(role: .assistant, text: reply, source: adv.name)); isAsking = false; Haptics.play(.confirm)
@@ -488,10 +484,6 @@ final class AppModel {
         let ctx = AdvisorContext(candidates: [c], free: freeBytes, total: totalBytes, redactNames: AdvisorFactory.shouldRedact(settings.advisorMode), catalog: catalog)
         guard let item = ctx.items.first else { return }
         let adv = advisor
-        Task {
-            var text = try? await adv.explain(item)
-            if text == nil { text = try? await RuleAdvisor().explain(item) }
-            explanations[c.id] = text ?? ""
-        }
+        Task { explanations[c.id] = await Assistant.explain(item, advisor: adv) }
     }
 }

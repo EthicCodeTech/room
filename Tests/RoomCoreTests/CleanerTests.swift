@@ -414,3 +414,128 @@ extension Double { var i: Int64 { Int64(self) } }
         #expect(sizes["Docker (Colima)"] == nil, "absent folders are skipped, not reported as zero")
     }
 }
+
+/// A second drive, faked: everything under `<sandbox>/drive` counts as its own volume mounted at that folder.
+@Suite("Vault on external drives") struct ExternalVaultTests {
+    func make(_ sb: Sandbox) throws -> (Vault, URL) {
+        try sb.paths.ensureDirectories()
+        let drive = sb.root.appendingPathComponent("drive", isDirectory: true)
+        try FileManager.default.createDirectory(at: drive, withIntermediateDirectories: true)
+        let prefix = drive.path + "/"
+        let vault = Vault(paths: sb.paths,
+                          volumeRoot: { $0.path.hasPrefix(prefix) ? drive : nil },
+                          isSameVolume: { a, b in a.path.hasPrefix(prefix) == b.path.hasPrefix(prefix) })
+        return (vault, drive)
+    }
+    func put(_ drive: URL, _ name: String) throws -> URL {
+        let url = drive.appendingPathComponent(name)
+        try Data(count: 2048).write(to: url)
+        return url
+    }
+    func stash(_ vault: Vault, _ url: URL) throws -> VaultManifest {
+        try vault.stash([(url: url, bytes: 2048, title: "Clip", ruleID: "detect.installer")], label: "Clip", days: 7).0
+    }
+
+    @Test func driveItemsStayOnTheDriveAndComeBack() throws {
+        let sb = try Sandbox(); let (vault, drive) = try make(sb)
+        let f = try put(drive, "render.mov")
+        let m = try stash(vault, f)
+        let e = try #require(m.entries.first)
+        #expect(e.volume == drive.path && e.viaTrash == nil)
+        #expect(e.storedPath.hasPrefix(drive.appendingPathComponent(Vault.driveFolder).path), "kept in the drive's own vault, not copied to the Mac")
+        #expect(!FileManager.default.fileExists(atPath: f.path))
+        _ = try vault.restore(m.id)
+        #expect(FileManager.default.fileExists(atPath: f.path))
+        #expect(!FileManager.default.fileExists(atPath: drive.appendingPathComponent(Vault.driveFolder).path), "an empty vault leaves nothing behind")
+        #expect(vault.list().isEmpty)
+    }
+
+    @Test func purgeRemovesTheDriveCopyAndTidiesUp() throws {
+        let sb = try Sandbox(); let (vault, drive) = try make(sb)
+        let m = try stash(vault, try put(drive, "a.mov"))
+        #expect(vault.purge(m.id))
+        #expect(!FileManager.default.fileExists(atPath: drive.appendingPathComponent(Vault.driveFolder).path))
+        #expect(vault.list().isEmpty)
+    }
+
+    @Test func aDriveThatIsNotConnectedKeepsItsBatchUntilItIsBack() throws {
+        let sb = try Sandbox(); let (vault, drive) = try make(sb)
+        let f = try put(drive, "b.mov")
+        let m = try stash(vault, f)
+        let away = sb.root.appendingPathComponent("drive-away")
+        try FileManager.default.moveItem(at: drive, to: away)                                   // unplug
+        #expect(!vault.isAvailable(m))
+        #expect(!vault.purge(m.id), "can't delete what we can't reach")
+        #expect(throws: Vault.VaultError.self) { try vault.restore(m.id) }
+        #expect(vault.list().count == 1, "the batch is still listed")
+        #expect(vault.purgeExpired(now: Date().addingTimeInterval(30 * 86_400)) == 0)
+        try FileManager.default.moveItem(at: away, to: drive)                                   // plug back in
+        #expect(vault.isAvailable(m))
+        _ = try vault.restore(m.id)
+        #expect(FileManager.default.fileExists(atPath: f.path))
+    }
+
+    @Test func aReadOnlyDriveNeverLosesTheFile() throws {
+        let sb = try Sandbox(); try sb.paths.ensureDirectories()
+        let drive = sb.root.appendingPathComponent("ro", isDirectory: true)
+        try FileManager.default.createDirectory(at: drive, withIntermediateDirectories: true)
+        let f = drive.appendingPathComponent("c.mov"); try Data(count: 2048).write(to: f)
+        let prefix = drive.path + "/"
+        let vault = Vault(paths: sb.paths, volumeRoot: { $0.path.hasPrefix(prefix) ? drive : nil }, isSameVolume: { _, _ in false })
+        try FileManager.default.setAttributes([.posixPermissions: 0o555], ofItemAtPath: drive.path)   // read-only
+        defer { try? FileManager.default.setAttributes([.posixPermissions: 0o755], ofItemAtPath: drive.path) }
+        let m = try stash(vault, f)
+        // The vault can't be created there, and the Trash fallback can't remove the file either, so it is reported, never lost.
+        #expect(m.entries.isEmpty)
+        #expect(FileManager.default.fileExists(atPath: f.path))
+    }
+}
+
+@Suite("Assistant answers in plain words") struct AssistantTests {
+    func item(_ id: String, _ title: String, _ bytes: Int64, _ tier: RiskTier = .safe) -> AdvisorContext.Item {
+        .init(id: id, title: title, tier: tier, regen: .instant, bytes: bytes, ageDays: 75, backup: nil, why: "A cache.")
+    }
+    func ctx() -> AdvisorContext {
+        var c = AdvisorContext(candidates: [], free: 12_000_000_000, total: 494_000_000_000, redactNames: false)
+        c.items = [item("cache.gradle#089a2801", "Gradle caches", 6_217_768_960), item("cache.browsers#d05691cf", "Browser caches", 31_764_480),
+                   item("detect.large#1", "Big old file", 2_068_938_752, .yours)]
+        return c
+    }
+
+    @Test func questionsAreRoutedByCode() {
+        #expect(Assistant.route("what is my name?") == .offTopic)
+        #expect(Assistant.route("2+2") == .offTopic)
+        #expect(Assistant.route("what is the largest file on my disk") == .largest)
+        #expect(Assistant.route("What grew this week?") == .growth)
+        #expect(Assistant.route("what can I safely delete?") == .summary)
+        #expect(Assistant.route("why is my disk so full") == .model)
+    }
+
+    @Test func offTopicQuestionsGetAShortRefusalNotAnItemDump() async {
+        let a = await Assistant.answer("what is my name?", advisor: RuleAdvisor(), context: ctx())
+        #expect(a.text.hasPrefix("I can only help with the storage")); #expect(!a.text.contains("#"))
+    }
+
+    @Test func largestIsAnsweredExactlyWithoutIdsOrByteCounts() async {
+        let a = await Assistant.answer("what is the largest file on my disk", advisor: RuleAdvisor(), context: ctx())
+        #expect(a.text.contains("Gradle caches")); #expect(a.text.contains("GB"))
+        #expect(!a.text.contains("#")); #expect(!a.text.contains("6217768960")); #expect(a.text.contains("Map"))
+    }
+
+    @Test func modelOutputIsCleanedAndBrokenOutputFallsBack() {
+        let raw = "The item id cache.gradle#089a2801 is safe and contains 6217768960 bytes."
+        let cleaned = Assistant.clean(raw, context: ctx())
+        #expect(cleaned.contains("Gradle caches")); #expect(!cleaned.contains("#")); #expect(!cleaned.contains("6217768960"))
+        #expect(Assistant.clean("A 2,068,938,752 bytes file", context: ctx()).contains("GB"))
+        #expect(!Assistant.isUsable("the item id 123 is browser caches with tier safe and regen instant"))
+        #expect(!Assistant.isUsable("cache.unknown#ab12cd34 is safe"))
+        #expect(Assistant.isUsable("Gradle caches are safe to clear and rebuild the next time you build a project."))
+        #expect(Assistant.isUsable("That is about 4 gigabytes of old simulators."), "the word gigabytes is fine")
+    }
+
+    @Test func factSheetHasNoIdsAndNoRawByteCounts() {
+        let sheet = AdvisorPrompts.factSheet(ctx())
+        #expect(!sheet.contains("#")); #expect(!sheet.contains("6217768960")); #expect(!sheet.contains("tier"))
+        #expect(sheet.contains("Gradle caches")); #expect(sheet.contains("safe to clear")); #expect(sheet.contains("2 months ago"))
+    }
+}
