@@ -8,7 +8,7 @@ A product of [EthicCode](https://ethiccode.in/room), built on the [Cinnabar](htt
 
 ## Requirements
 
-- Apple silicon Mac
+- A Mac with Apple silicon or Intel (one universal download)
 - macOS 26 or later
 
 ## Install
@@ -43,7 +43,7 @@ Room isn't notarized by Apple yet, so your Mac asks you to confirm once. It take
 - **Map**: a fast treemap of any folder. Click to descend, hover for details.
 - **Undo vault**: your own files, installers and zips are moved here for 7 days and can be restored in one click. Caches are deleted directly; rebuildable folders can be vaulted with a setting.
 - **Safety rails**: path safety checks, and a git guard that flags repos with uncommitted or unpushed work before anything near them is suggested.
-- **Liquid tank**: free space as water that follows your MacBook's tilt, using the built-in motion sensor.
+- **Liquid tank**: free space as water that follows your MacBook's tilt, using the built-in motion sensor (Apple silicon MacBooks; on other Macs the water stays still).
 - **Cinnabar Glass**: Cinnabar's flat surfaces and hairlines mixed with macOS 26 Liquid Glass, in light and dark. See [docs/cinnabar-glass.md](docs/cinnabar-glass.md).
 - **Privacy**: no accounts, and no upload endpoint is configured in this release. The optional anonymized decision log stays on your Mac and is off until you opt in.
 
