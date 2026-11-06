@@ -10,7 +10,7 @@ symlinks = {"Applications": "/Applications"}
 background = bg
 if icon:
     icon = icon
-window_rect = ((200, 120), (660, 400))
+window_rect = ((200, 120), (660, 432))   # content area is 660 x 400 below the title bar
 default_view = "icon-view"
 show_status_bar = False
 show_tab_view = False
@@ -20,6 +20,6 @@ show_sidebar = False
 icon_size = 112
 text_size = 13
 icon_locations = {
-    os.path.basename(app): (165, 190),
-    "Applications": (495, 190),
+    os.path.basename(app): (165, 255),
+    "Applications": (495, 255),
 }
