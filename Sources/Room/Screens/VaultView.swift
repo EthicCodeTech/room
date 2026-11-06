@@ -11,7 +11,7 @@ struct VaultView: View {
                     VStack(alignment: .leading, spacing: 10) {
                         Eyebrow(text: "Vault")
                         Text("Changed your mind? Undo here.").dsText(Token.h1)
-                        Text("Anything of yours that you delete waits here for 7 days. The space only comes back when the vault is emptied.")
+                        Text("Your files, installers and zips wait here for 7 days after you delete them. The space only comes back when the vault is emptied.")
                             .dsText(Token.bodyLg, color: DS.textMuted).frame(maxWidth: 620, alignment: .leading)
                     }
                     Spacer()

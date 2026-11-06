@@ -398,18 +398,18 @@ final class AppModel {
         func n(_ name: String, _ gb: Double, parent: String = "/sample", kids: [DiskNode] = []) -> DiskNode {
             DiskNode(path: "\(parent)/\(name)", name: name, bytes: Int64(gb * 1e9), children: kids, isDirectory: true)
         }
-        let projects = (["cet-bot": 9.1, "AtharvaChauhan": 7.7, "conexion": 5.0, "prbot": 4.9, "meeting-ai": 3.9, "CET-Buddy": 2.9, "brewstack": 2.7, "LibraryAPI": 2.3])
+        let projects = (["web-app": 9.1, "mobile-app": 7.7, "api-server": 5.0, "design-assets": 4.9, "notes": 3.9, "game-prototype": 2.9, "blog": 2.7, "cli-tool": 2.3])
             .map { n($0.key, $0.value, parent: "/sample/Projects") }.sorted { $0.bytes > $1.bytes }
-        let kids = [n("Projects", 79.95, kids: projects), n("Library", 69.63), n(".colima", 22.11), n("CallArchive", 12.83), n("Downloads", 8.24),
-                    n("Documents", 7.0), n(".gemini", 6.86), n(".gradle", 6.79), n(".ollama", 9.88), n("My project", 3.67), n(".codex", 3.38),
-                    n(".android", 3.36), n("tizen-studio", 4.32), n("Movies", 1.6), n("Desktop", 1.4)].sorted { $0.bytes > $1.bytes }
+        let kids = [n("Projects", 79.95, kids: projects), n("Library", 69.63), n(".colima", 22.11), n("Archive", 12.83), n("Downloads", 8.24),
+                    n("Documents", 7.0), n(".cache", 6.86), n(".gradle", 6.79), n(".ollama", 9.88), n("Sketches", 3.67), n(".config", 3.38),
+                    n(".android", 3.36), n("SDKs", 4.32), n("Movies", 1.6), n("Desktop", 1.4)].sorted { $0.bytes > $1.bytes }
         mapTree = DiskNode(path: "/sample", name: "Home", bytes: kids.reduce(0) { $0 + $1.bytes }, children: kids, isDirectory: true)
         mapTrail = ["/sample"]; mapUpdatedAt = Date().addingTimeInterval(-180)
         func cand(_ id: String, _ path: String, _ gb: Double) -> Candidate {
             Candidate(id: id, ruleID: "cache.spotify", kind: .rule, title: id, why: "", tier: .safe, regen: .instant, action: .deleteItem,
                       targets: [URL(fileURLWithPath: path)], displayPath: path, estimate: SizeEstimate(allocated: Int64(gb * 1e9), guaranteed: Int64(gb * 1e9)), lastModified: nil, preselected: true)
         }
-        freeable = FreeableIndex(candidates: [cand("a", "/sample/Library/Caches/Spotify", 3.7), cand("b", "/sample/.gradle/caches", 6.2), cand("c", "/sample/Projects/cet-bot/node_modules", 0.9)])
+        freeable = FreeableIndex(candidates: [cand("a", "/sample/Library/Caches/Spotify", 3.7), cand("b", "/sample/.gradle/caches", 6.2), cand("c", "/sample/Projects/web-app/node_modules", 0.9)])
         if Dev.env("ROOM_DEV_MAPMODE") == "list" { mapMode = .list }
         if Dev.env("ROOM_DEV_DRILL") != nil { openFolder("/sample/Projects") }
     }
