@@ -205,9 +205,10 @@ struct ConfirmCleanDialog: View {
                 ZStack { Circle().fill(DS.failedTint); Image(systemName: "trash").font(.system(size: 15, weight: .regular)).foregroundStyle(DS.failedText) }.frame(width: 40, height: 40)
                 Text("Delete \(items.count) item\(items.count == 1 ? "" : "s") and free \(amount)?").dsText(Token.h3)
                 VStack(alignment: .leading, spacing: 8) {
-                    let direct = items.filter { $0.tier != .yours }
+                    let direct = items.filter { $0.tier != .yours && !DeletionPolicy.vaultedRuleIDs.contains($0.ruleID) }
                     if !direct.isEmpty { Text("\(direct.count) cache\(direct.count == 1 ? "" : "s") and rebuildable item\(direct.count == 1 ? "" : "s") go right away. They come back by themselves or with one command.").dsText(Token.small, color: DS.textMuted) }
-                    if !yours.isEmpty { Text("\(yours.count) of your own item\(yours.count == 1 ? "" : "s") go to the undo vault for 7 days. The space returns when you empty the vault.").dsText(Token.small, color: DS.textMuted) }
+                    let waiting = items.filter { $0.tier == .yours || DeletionPolicy.vaultedRuleIDs.contains($0.ruleID) }
+                    if !waiting.isEmpty { Text("\(waiting.count) file\(waiting.count == 1 ? "" : "s") of yours (installers, zips, your own items) go to the undo vault for 7 days. The space returns when you empty the vault.").dsText(Token.small, color: DS.textMuted) }
                     if items.contains(where: { $0.estimate.isAmbiguous }) { Text("Some items share space with other files, so the amount that returns may be lower. Room measures it afterwards.").dsText(Token.micro, color: DS.textFaint) }
                 }.fixedSize(horizontal: false, vertical: true)
 
