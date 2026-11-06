@@ -55,4 +55,12 @@ public enum DeletionPolicy: Equatable, Sendable {
         case .yours: .vault(days: 7)
         }
     }
+
+    /// Detected files (installers, zips that have an extracted copy) are not caches. They are things someone
+    /// downloaded or made, so they wait in the vault even though they are not in the "yours" tier.
+    public static let vaultedRuleIDs: Set<String> = ["detect.installer", "detect.zip-duplicate"]
+
+    public static func `default`(for c: Candidate) -> DeletionPolicy {
+        vaultedRuleIDs.contains(c.ruleID) ? .vault(days: 7) : .default(for: c.tier)
+    }
 }

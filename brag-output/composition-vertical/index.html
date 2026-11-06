@@ -1,0 +1,350 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1080, height=1920" />
+    <title>Room — Tells you first (Reels)</title>
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+    <script src="assets/audio-data.js"></script>
+    <style>
+      @font-face { font-family: "Parkinsans"; font-weight: 400; src: url("assets/fonts/Parkinsans_400Regular.ttf"); }
+      @font-face { font-family: "Parkinsans"; font-weight: 500; src: url("assets/fonts/Parkinsans_500Medium.ttf"); }
+      @font-face { font-family: "Parkinsans"; font-weight: 600; src: url("assets/fonts/Parkinsans_600SemiBold.ttf"); }
+      @font-face { font-family: "Parkinsans"; font-weight: 700; src: url("assets/fonts/Parkinsans_700Bold.ttf"); }
+      @font-face { font-family: "JetBrains Mono"; font-weight: 400; src: url("assets/fonts/JetBrainsMono_400Regular.ttf"); }
+      @font-face { font-family: "JetBrains Mono"; font-weight: 500; src: url("assets/fonts/JetBrainsMono_500Medium.ttf"); }
+
+      :root {
+        --sindoor: #f2542d; --sindoor-text: #ff7a57;
+        --obsidian: #0b0b0d; --graphite: #16161a; --raised: #1a1a1f; --input: #222228;
+        --paper: #f7f7f5; --line: #232328; --line-strong: #2a2a30; --line-stronger: #3a3a42;
+        --text-soft: #d4d4d8; --muted: #a1a1aa; --faint: #8a8a93;
+        --success: #22c55e; --success-text: #4ade80; --pending: #eab308; --pending-text: #facc15; --rose: #e11d48;
+        --sans: "Parkinsans", system-ui, sans-serif; --mono: "JetBrains Mono", ui-monospace, monospace;
+      }
+      * { box-sizing: border-box; }
+      body { margin: 0; background: var(--obsidian); color: var(--paper); font-family: var(--sans); }
+      #root { position: relative; width: 100%; height: 100%; overflow: hidden; background: var(--obsidian); }
+      .clip { position: absolute; inset: 0; }
+      .sc { position: absolute; inset: 0; }
+      .abs { position: absolute; }
+      .label { font: 500 26px/1 var(--mono); letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); }
+      .display { font: 700 128px/1.02 var(--sans); letter-spacing: -0.03em; color: var(--paper); }
+      .h { font: 700 100px/1.04 var(--sans); letter-spacing: -0.03em; color: var(--paper); }
+      .acc { color: var(--sindoor-text); }
+
+      /* scene 1 */
+      #s1-label { left: 80px; top: 290px; display: flex; align-items: center; gap: 14px; }
+      #s1-label i { width: 14px; height: 14px; border-radius: 50%; background: var(--line-stronger); display: block; }
+      #s1-h { left: 80px; top: 350px; width: 920px; }
+      #tank1 { left: 320px; top: 720px; width: 440px; height: 660px; }
+      #s1-free { left: 0; top: 1412px; width: 1080px; text-align: center; font: 500 40px/1 var(--mono); color: var(--text-soft); }
+      .vessel { position: absolute; inset: 0; border-radius: 52px; border: 1px solid var(--line-strong); background: var(--graphite); overflow: hidden; }
+      .vessel svg { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+      .tickmarks i { position: absolute; right: 24px; height: 1px; background: var(--line-stronger); display: block; }
+
+      /* scene 2 */
+      .col { left: 80px; width: 740px; }
+      #h2a, #h2b { top: 250px; }
+      #h2a-sub { left: 80px; top: 478px; width: 920px; font: 400 34px/1.3 var(--sans); color: var(--muted); }
+      #win { left: 60px; top: 560px; width: 900px; height: 940px; border-radius: 28px; border: 1px solid var(--line-strong); background: var(--graphite); overflow: hidden; }
+      .brand { left: 28px; top: 28px; display: flex; align-items: center; gap: 12px; font: 600 30px/1 var(--sans); letter-spacing: -0.01em; }
+      .brand svg { width: 36px; height: 36px; display: block; }
+      #hdr-label { right: 28px; top: 38px; font: 500 18px/1 var(--mono); letter-spacing: 0.14em; text-transform: uppercase; color: var(--faint); }
+      #free-l { left: 28px; top: 100px; font: 500 18px/1 var(--mono); letter-spacing: 0.12em; text-transform: uppercase; color: var(--faint); }
+      #mini-free { right: 28px; top: 90px; font: 500 30px/1 var(--mono); color: var(--text-soft); }
+      #bar0 { left: 28px; top: 140px; width: 844px; height: 18px; border-radius: 9px; background: var(--input); border: 1px solid var(--line-strong); overflow: hidden; }
+      #usedfill { position: absolute; left: 0; top: 0; bottom: 0; width: 96.7%; background: var(--sindoor); display: block; }
+      .hdr { left: 28px; top: 188px; width: 844px; font: 600 36px/1.2 var(--sans); letter-spacing: -0.01em; color: var(--paper); }
+      .row { position: absolute; left: 28px; width: 844px; height: 104px; border-radius: 18px; background: var(--raised); border: 1px solid var(--line); display: flex; align-items: center; padding: 0 24px; gap: 18px; }
+      .chk { width: 32px; height: 32px; border-radius: 9px; border: 1.5px solid var(--line-stronger); background: var(--input); flex: none; position: relative; }
+      .chk svg { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+      .chk .tick { opacity: 0; }
+      .rt { flex: 1; min-width: 0; }
+      .rt b { display: block; font: 600 28px/1.15 var(--sans); color: var(--paper); }
+      .rt em { display: block; font: 400 21px/1.3 var(--sans); font-style: normal; color: var(--muted); margin-top: 6px; }
+      .rt em.warn { color: var(--pending-text); }
+      .rt em.m { font: 400 18px/1.3 var(--mono); }
+      .sz { flex: none; width: 150px; text-align: right; font: 500 28px/1 var(--mono); color: var(--paper); }
+      #r1 { top: 316px; } #r2 { top: 432px; } #r3 { top: 548px; } #r4 { top: 664px; }
+      #more { left: 28px; top: 790px; font: 400 22px/1 var(--sans); color: var(--faint); }
+      #bar { left: 28px; width: 844px; top: 820px; height: 96px; border-radius: 22px; background: rgba(22, 22, 26, 0.78); border: 1px solid var(--line-stronger); backdrop-filter: blur(16px); display: flex; align-items: center; justify-content: space-between; padding: 0 18px 0 28px; }
+      #bar .sel { font: 500 24px/1 var(--mono); color: var(--text-soft); }
+      #del { width: 250px; height: 62px; border-radius: 16px; background: var(--rose); color: #fff; font: 600 26px/62px var(--sans); text-align: center; }
+      #toast { left: 28px; width: 844px; top: 820px; height: 96px; border-radius: 22px; background: rgba(22, 22, 26, 0.78); border: 1px solid var(--line-stronger); backdrop-filter: blur(16px); display: flex; align-items: center; gap: 18px; padding: 0 28px; }
+      #toast .dotk { width: 14px; height: 14px; border-radius: 50%; background: var(--success); flex: none; }
+      #toast b { font: 600 34px/1 var(--sans); color: var(--paper); }
+      #toast em { font: 400 22px/1 var(--sans); font-style: normal; color: var(--muted); margin-left: auto; }
+      #cursor { left: 0; top: 0; width: 40px; height: 40px; }
+      #rip { left: -34px; top: -34px; width: 68px; height: 68px; border-radius: 50%; border: 2px solid var(--paper); opacity: 0; }
+
+      /* scene 3 */
+      #h3 { top: 250px; }
+      #vault { left: 60px; top: 580px; width: 960px; height: 700px; border-radius: 28px; background: var(--graphite); border: 1px solid var(--line-strong); }
+      #v-title { left: 40px; top: 40px; font: 600 40px/1 var(--sans); letter-spacing: -0.01em; }
+      #v-sub { left: 40px; top: 100px; width: 880px; font: 400 28px/1.3 var(--sans); color: var(--muted); }
+      #v-total { left: 40px; top: 164px; font: 500 72px/1 var(--mono); color: var(--paper); }
+      #v-total small { font: 400 26px/1 var(--sans); color: var(--faint); margin-left: 16px; }
+      .vrow { position: absolute; left: 36px; width: 888px; height: 112px; border-radius: 18px; background: var(--raised); border: 1px solid var(--line); display: flex; align-items: center; padding: 0 24px; gap: 18px; }
+      .vrow .sz { width: 140px; }
+      .undo { flex: none; width: 150px; height: 56px; border-radius: 14px; border: 1px solid var(--line-stronger); background: var(--input); color: var(--paper); font: 600 24px/54px var(--sans); text-align: center; position: relative; }
+      .undo .t2 { position: absolute; inset: 0; opacity: 0; color: var(--success-text); background: var(--input); border-radius: 14px; }
+      #vr1 { top: 290px; } #vr2 { top: 416px; } #vr3 { top: 542px; }
+
+      /* scene 4 */
+      #lockup { left: 0; top: 470px; width: 1080px; height: 200px; display: flex; align-items: center; justify-content: center; gap: 26px; }
+      #logoBreath { display: block; width: 180px; height: 180px; }
+      #logoBreath svg { width: 180px; height: 180px; overflow: visible; display: block; }
+      #word { font: 600 160px/1 var(--sans); letter-spacing: -0.04em; color: var(--paper); padding-bottom: 14px; }
+      #tag { left: 0; top: 780px; width: 1080px; text-align: center; font: 500 64px/1.25 var(--sans); letter-spacing: -0.02em; color: var(--text-soft); }
+      #tag div { display: block; }
+      #built { left: 0; top: 1040px; width: 1080px; text-align: center; font: 600 48px/1 var(--sans); letter-spacing: -0.01em; color: var(--paper); }
+    </style>
+  </head>
+  <body>
+    <div id="root" data-composition-id="main" data-start="0" data-width="1080" data-height="1920" data-duration="22.4">
+
+      <section id="s1" class="clip" data-start="0" data-duration="4.4">
+        <div class="sc">
+          <div id="s1-label" class="abs label"><i></i>Macintosh HD</div>
+          <div id="s1-h" class="abs display">Your Mac is full.</div>
+          <div id="tank1" class="abs">
+            <div class="vessel">
+              <svg viewBox="0 0 440 660" preserveAspectRatio="none">
+                <path id="t1fill" fill="#f2542d" d="M0 660H440V300H0Z"/>
+                <path id="t1line" fill="none" stroke="#ff6a44" stroke-width="3" d="M0 300H440"/>
+              </svg>
+              <div class="tickmarks"><i style="top:165px;width:28px"></i><i style="top:330px;width:44px"></i><i style="top:495px;width:28px"></i></div>
+            </div>
+          </div>
+          <div id="s1-free" class="abs">4.2 GB free</div>
+        </div>
+      </section>
+
+      <section id="s2" class="clip" data-start="4" data-duration="9.5">
+        <div class="sc">
+          <div id="h2a" class="abs col h">Room tells you <span class="acc">first.</span></div>
+          <div id="h2a-sub" class="abs">Every item. Every reason.</div>
+          <div id="h2b" class="abs col h">You approve. Then it cleans.</div>
+
+          <div id="win" class="abs">
+            <div class="abs brand">
+              <svg viewBox="0 0 48 48"><path d="M14 42V10a4 4 0 0 1 4-4h12a4 4 0 0 1 4 4v32M8 42h32" fill="none" stroke="#F7F7F5" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/><circle cx="28" cy="25" r="3.2" fill="#F2542D"/></svg>
+              <span>room</span>
+            </div>
+            <div id="hdr-label" class="abs">Review</div>
+            <div id="free-l" class="abs">Free space</div>
+            <div id="mini-free" class="abs">4.2 GB free</div>
+            <div id="bar0" class="abs"><span id="usedfill"></span></div>
+            <div id="hdrA" class="abs hdr">Room can free 38.4 GB without touching your files.</div>
+            <div id="hdrB" class="abs hdr">7.2 GB to review.</div>
+
+            <div id="r1" class="row">
+              <div class="chk"><svg viewBox="0 0 32 32"><path class="tick" d="M9 16.5l4.5 4.5 9-10" fill="none" stroke="#0B0B0D" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+              <div class="rt"><b>Xcode DerivedData</b><em>Rebuilt the next time you build.</em></div>
+              <div class="sz">14.2 GB</div>
+            </div>
+            <div id="r2" class="row">
+              <div class="chk"><svg viewBox="0 0 32 32"><path class="tick" d="M9 16.5l4.5 4.5 9-10" fill="none" stroke="#0B0B0D" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+              <div class="rt"><b>Simulator caches</b><em>Not booted in 90 days.</em></div>
+              <div class="sz">9.8 GB</div>
+            </div>
+            <div id="r3" class="row">
+              <div class="chk"><svg viewBox="0 0 32 32"><path class="tick" d="M9 16.5l4.5 4.5 9-10" fill="none" stroke="#0B0B0D" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+              <div class="rt"><b>Docker build cache</b><em>Recreated by Docker when needed.</em></div>
+              <div class="sz">7.2 GB</div>
+            </div>
+            <div id="r4" class="row">
+              <div class="chk"></div>
+              <div class="rt"><b>node_modules · old project</b><em class="warn">It is not backed up: 2 unpushed commits</em></div>
+              <div class="sz">3.9 GB</div>
+            </div>
+            <div id="more" class="abs">and 6 more in Review</div>
+
+            <div id="bar" class="abs"><span class="sel">3 selected · 31.2 GB</span><div id="del">Delete 3 items</div></div>
+            <div id="toast" class="abs"><span class="dotk"></span><b>31.2 GB back.</b><em>Undo here.</em></div>
+          </div>
+
+          <svg id="cursor" class="abs" viewBox="0 0 34 34"><path d="M3 2l0 24 6.5-6 4 9.5 4-1.7-4-9.3 9 0z" fill="#F7F7F5" stroke="#0B0B0D" stroke-width="2" stroke-linejoin="round"/></svg>
+          <div id="rip" class="abs"></div>
+        </div>
+      </section>
+
+      <section id="s3" class="clip" data-start="13.1" data-duration="4.8">
+        <div class="sc">
+          <div id="h3" class="abs col h">Nothing is lost for 7 days.</div>
+          <div id="vault" class="abs">
+            <div id="v-title" class="abs">Undo vault</div>
+            <div id="v-sub" class="abs">Anything you delete waits here for 7 days.</div>
+            <div id="v-total" class="abs"><span id="v-num">31.2 GB</span><small>waiting</small></div>
+            <div id="vr1" class="vrow"><div class="rt"><b>Xcode DerivedData</b><em class="m">7 days left</em></div><div class="sz">14.2 GB</div><div class="undo">Undo</div></div>
+            <div id="vr2" class="vrow"><div class="rt"><b>Simulator caches</b><em class="m">7 days left</em></div><div class="sz">9.8 GB</div><div class="undo"><span id="u2a">Undo</span><span id="u2b" class="t2">Restored</span></div></div>
+            <div id="vr3" class="vrow"><div class="rt"><b>Docker build cache</b><em class="m">7 days left</em></div><div class="sz">7.2 GB</div><div class="undo">Undo</div></div>
+          </div>
+          <svg id="cursor3" class="abs" viewBox="0 0 34 34" style="left:0;top:0;width:40px;height:40px"><path d="M3 2l0 24 6.5-6 4 9.5 4-1.7-4-9.3 9 0z" fill="#F7F7F5" stroke="#0B0B0D" stroke-width="2" stroke-linejoin="round"/></svg>
+          <div id="rip3" class="abs" style="left:-34px;top:-34px;width:68px;height:68px;border-radius:50%;border:2px solid #F7F7F5;opacity:0"></div>
+        </div>
+      </section>
+
+      <section id="s4" class="clip" data-start="17.5" data-duration="4.9">
+        <div class="sc">
+          <div id="lockup" class="abs">
+            <div id="logoBreath">
+              <svg viewBox="0 0 48 48">
+                <circle id="halo" cx="28" cy="25" r="9" fill="#F2542D" opacity="0"/>
+                <path id="door" pathLength="1" d="M14 42V10a4 4 0 0 1 4-4h12a4 4 0 0 1 4 4v32M8 42h32" fill="none" stroke="#F7F7F5" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="1" stroke-dashoffset="0"/>
+                <circle id="knob" cx="28" cy="25" r="3.2" fill="#F2542D"/>
+              </svg>
+            </div>
+            <div id="word">room</div>
+          </div>
+          <div id="tag" class="abs"><div id="tag1">Makes space on your Mac.</div><div id="tag2">Tells you <span class="acc">first.</span></div></div>
+          <div id="built" class="abs">@ethiccode.in</div>
+        </div>
+      </section>
+
+      <audio id="bg-music" data-start="0" data-duration="22.4" data-track-index="10" data-volume="0.40" src="assets/music/happy-beats-business-moves-vol-12-by-ende-dot-app.mp3" data-automation='{"version":1,"lanes":[{"target":"volume","points":[{"t":0,"v":0},{"t":0.6,"v":1},{"t":20.2,"v":1},{"t":22.3,"v":0}]}]}'></audio>
+      <audio id="sfx-row" data-start="4.85" data-track-index="11" data-volume="0.5" src="assets/sfx/casino/card-slide-1.ogg"></audio>
+      <audio id="sfx-t1" data-start="9.27" data-track-index="12" data-volume="0.55" src="assets/sfx/interface/click_003.ogg"></audio>
+      <audio id="sfx-t2" data-start="9.81" data-track-index="13" data-volume="0.55" src="assets/sfx/interface/click_003.ogg"></audio>
+      <audio id="sfx-t3" data-start="10.35" data-track-index="14" data-volume="0.55" src="assets/sfx/interface/click_003.ogg"></audio>
+      <audio id="sfx-del" data-start="11.43" data-track-index="15" data-volume="0.7" src="assets/sfx/interface/click_002.ogg"></audio>
+      <audio id="sfx-pay" data-start="11.6" data-track-index="16" data-volume="0.55" src="assets/sfx/interface/bong_001.ogg"></audio>
+      <audio id="sfx-vault" data-start="13.08" data-track-index="17" data-volume="0.5" src="assets/sfx/interface/drop_001.ogg"></audio>
+      <audio id="sfx-undo" data-start="15.82" data-track-index="18" data-volume="0.6" src="assets/sfx/interface/click_003.ogg"></audio>
+      <audio id="sfx-knob" data-start="18.5" data-track-index="19" data-volume="0.55" src="assets/sfx/impact/impactBell_heavy_000.ogg"></audio>
+    </div>
+
+    <script>
+      var clamp = function (v, a, b) { return Math.max(a, Math.min(b, v)); };
+      var E = function (n) { return gsap.parseEase(n); };
+      var seg = function (t, a, b, ease) { return E(ease || "power2.out")(clamp((t - a) / (b - a), 0, 1)); };
+      var slosh = function (t, t0, k) { return t < t0 ? 0 : k * Math.exp(-2.4 * (t - t0)) * Math.cos(9 * (t - t0)); };
+
+      var T1 = { el: document.getElementById("t1fill"), line: document.getElementById("t1line"), W: 440, H: 660 };
+      var miniFree = document.getElementById("mini-free");
+      var usedFill = document.getElementById("usedfill");
+      var halo = document.getElementById("halo");
+      var breath = document.getElementById("logoBreath");
+      var vNum = document.getElementById("v-num");
+
+      function wave(T, level, amp, phase, tilt) {
+        var y0 = T.H * (1 - level), pts = [], step = T.W / 40;
+        for (var i = 0; i <= 40; i++) {
+          var x = i * step, u = x / T.W;
+          var y = y0 + amp * Math.sin(u * 7.5 + phase) + amp * 0.45 * Math.sin(u * 14.5 - phase * 1.3) + tilt * (u - 0.5) * T.W * 0.5;
+          pts.push(x.toFixed(1) + " " + y.toFixed(2));
+        }
+        var top = "M" + pts.join(" L");
+        T.line.setAttribute("d", top);
+        T.el.setAttribute("d", top + " L" + T.W + " " + T.H + " L0 " + T.H + " Z");
+      }
+
+      function render(t) {
+        var i = clamp(Math.round(t * 30), 0, AUDIO_DATA.n - 1);
+        var bass = AUDIO_DATA.bass[i], tre = AUDIO_DATA.treble[i];
+        var l1 = 0.3 + 0.667 * seg(t, 0.2, 1.8, "power2.out");
+        wave(T1, l1, 3 + bass * 7, t * 2.4, slosh(t, 1.7, 0.16));
+        var drain = seg(t, 11.6, 12.9, "power2.inOut");
+        usedFill.style.width = ((0.967 - 0.243 * drain) * 100).toFixed(2) + "%";
+        miniFree.textContent = (4.2 + 31.2 * drain).toFixed(1) + " GB free";
+        vNum.textContent = (31.2 - 9.8 * seg(t, 15.84, 16.3, "power2.out")).toFixed(1) + " GB";
+        var k = seg(t, 18.5, 19.0, "power2.out");
+        halo.setAttribute("opacity", (k * (0.12 + tre * 0.9)).toFixed(3));
+        breath.style.transform = "scale(" + (1 + bass * 0.014 * k).toFixed(4) + ")";
+      }
+
+      var tl = gsap.timeline({ paused: true });
+      var S = { t: 0 };
+      tl.to(S, { t: 22.4, duration: 22.4, ease: "none", onUpdate: function () { render(S.t); } }, 0);
+      render(0);
+
+      /* Scene 1 */
+      tl.fromTo("#s1-label", { y: 14 }, { y: 0, duration: 0.6, ease: "power3.out" }, 0);
+      tl.fromTo("#s1-h", { y: 30 }, { y: 0, duration: 0.8, ease: "power3.out" }, 0);
+      tl.fromTo("#tank1", { y: 24 }, { y: 0, duration: 0.8, ease: "power3.out" }, 0);
+      tl.fromTo("#s1-free", { opacity: 0 }, { opacity: 1, duration: 0.5, ease: "power2.out" }, 1.7);
+      tl.to("#s1 .sc", { opacity: 0, duration: 0.5, ease: "power1.inOut" }, 3.85);
+
+      /* Scene 2 */
+      tl.fromTo("#s2 .sc", { opacity: 0 }, { opacity: 1, duration: 0.4, ease: "power1.out" }, 4.0);
+      tl.fromTo("#h2a", { opacity: 0, y: 36 }, { opacity: 1, y: 0, duration: 0.7, ease: "power3.out" }, 4.25);
+      tl.fromTo("#h2a-sub", { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: 0.6, ease: "power3.out" }, 4.7);
+      tl.fromTo("#win", { opacity: 0, y: 44 }, { opacity: 1, y: 0, duration: 0.8, ease: "power3.out" }, 4.2);
+      tl.set("#hdrB", { opacity: 0 }, 0);
+      tl.set(["#r1", "#r2", "#r3", "#r4", "#more"], { opacity: 0 }, 0);
+      [["#r1", 4.91], ["#r2", 5.34], ["#r3", 6.0], ["#r4", 6.56]].forEach(function (p) {
+        tl.fromTo(p[0], { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.5, ease: "power3.out" }, p[1]);
+      });
+      tl.to("#more", { opacity: 1, duration: 0.4 }, 7.1);
+      tl.to("#r4", { borderColor: "rgba(234,179,8,0.55)", duration: 0.5 }, 7.2);
+      tl.set(["#bar", "#toast"], { opacity: 0, y: 130 }, 0);
+
+      tl.to("#h2a, #h2a-sub", { opacity: 0, y: -20, duration: 0.4, ease: "power2.in" }, 8.3);
+      tl.fromTo("#h2b", { opacity: 0, y: 36 }, { opacity: 1, y: 0, duration: 0.7, ease: "power3.out" }, 8.74);
+
+      /* cursor: checkbox centers x=122, y = 560+row top+52 → 928 / 1044 / 1160 */
+      tl.set("#cursor", { x: 760, y: 700, opacity: 0 }, 0);
+      tl.to("#cursor", { opacity: 1, duration: 0.25 }, 8.95);
+      tl.to("#cursor", { x: 116, y: 922, duration: 0.34, ease: "power2.inOut" }, 8.95);
+      tl.to("#cursor", { x: 116, y: 1038, duration: 0.4, ease: "power2.inOut" }, 9.43);
+      tl.to("#cursor", { x: 116, y: 1154, duration: 0.4, ease: "power2.inOut" }, 9.97);
+      [["#r1", 9.29, 928], ["#r2", 9.83, 1044], ["#r3", 10.37, 1160]].forEach(function (p) {
+        tl.to(p[0] + " .chk", { backgroundColor: "#f2542d", borderColor: "#f2542d", duration: 0.15 }, p[1]);
+        tl.to(p[0] + " .tick", { opacity: 1, duration: 0.12 }, p[1] + 0.03);
+        tl.to(p[0], { borderColor: "rgba(242,84,45,0.4)", duration: 0.25 }, p[1]);
+        tl.set("#rip", { x: 122, y: p[2] }, p[1]);
+        tl.fromTo("#rip", { scale: 0.3, opacity: 0.6 }, { scale: 1.2, opacity: 0, duration: 0.45, ease: "power2.out" }, p[1]);
+      });
+      tl.to("#bar", { opacity: 1, y: 0, duration: 0.5, ease: "power3.out" }, 10.93);
+      /* Delete button center: x 60+28+844-18-125=789, y 560+820+48=1428 */
+      tl.to("#cursor", { x: 780, y: 1416, duration: 0.85, ease: "power2.inOut" }, 10.55);
+      tl.to("#del", { scale: 0.96, duration: 0.08 }, 11.42);
+      tl.to("#del", { scale: 1, duration: 0.14 }, 11.5);
+      tl.set("#rip", { x: 789, y: 1428 }, 11.43);
+      tl.fromTo("#rip", { scale: 0.3, opacity: 0.6 }, { scale: 1.4, opacity: 0, duration: 0.5, ease: "power2.out" }, 11.43);
+      tl.to("#bar", { opacity: 0, y: 130, duration: 0.35, ease: "power2.in" }, 11.55);
+      tl.to("#toast", { opacity: 1, y: 0, duration: 0.5, ease: "power3.out" }, 11.65);
+      tl.to(["#r1", "#r2", "#r3"], { opacity: 0, x: 48, duration: 0.4, ease: "power2.in", stagger: 0.07 }, 11.58);
+      tl.to("#r4", { y: -348, duration: 0.6, ease: "power3.inOut" }, 11.9);
+      tl.to("#more", { opacity: 0, duration: 0.3 }, 11.6);
+      tl.to("#hdrA", { opacity: 0, duration: 0.3 }, 11.6);
+      tl.to("#hdrB", { opacity: 1, duration: 0.4 }, 11.7);
+      tl.to("#cursor", { opacity: 0, duration: 0.3 }, 11.8);
+      tl.to("#s2 .sc", { opacity: 0, duration: 0.4, ease: "power1.inOut" }, 13.1);
+
+      /* Scene 3 */
+      tl.fromTo("#s3 .sc", { opacity: 0 }, { opacity: 1, duration: 0.4, ease: "power1.out" }, 13.1);
+      tl.fromTo("#h3", { opacity: 0, y: 36 }, { opacity: 1, y: 0, duration: 0.7, ease: "power3.out" }, 13.3);
+      tl.fromTo("#vault", { opacity: 0, y: 44 }, { opacity: 1, y: 0, duration: 0.8, ease: "power3.out" }, 13.3);
+      [["#vr1", 13.64], ["#vr2", 14.2], ["#vr3", 14.73]].forEach(function (p) {
+        tl.fromTo(p[0], { opacity: 0, y: 28 }, { opacity: 1, y: 0, duration: 0.5, ease: "power3.out" }, p[1]);
+      });
+      /* Undo button on row 2: x 60+36+888-24-75=885, y 580+416+56=1052 */
+      tl.set("#cursor3", { x: 700, y: 800, opacity: 0 }, 0);
+      tl.to("#cursor3", { opacity: 1, duration: 0.25 }, 15.1);
+      tl.to("#cursor3", { x: 876, y: 1044, duration: 0.7, ease: "power2.inOut" }, 15.1);
+      tl.to("#cursor3", { scale: 0.94, duration: 0.08, svgOrigin: "3 2" }, 15.82);
+      tl.to("#cursor3", { scale: 1, duration: 0.14, svgOrigin: "3 2" }, 15.9);
+      tl.set("#rip3", { x: 885, y: 1052 }, 15.84);
+      tl.fromTo("#rip3", { scale: 0.3, opacity: 0.6 }, { scale: 1.3, opacity: 0, duration: 0.5, ease: "power2.out" }, 15.84);
+      tl.to("#u2a", { opacity: 0, duration: 0.15 }, 15.84);
+      tl.to("#u2b", { opacity: 1, duration: 0.2 }, 15.86);
+      tl.to("#vr2", { borderColor: "rgba(34,197,94,0.45)", duration: 0.3 }, 15.86);
+      tl.to("#cursor3", { opacity: 0, duration: 0.3 }, 16.5);
+      tl.to("#s3 .sc", { opacity: 0, duration: 0.4, ease: "power1.inOut" }, 17.5);
+
+      /* Scene 4 */
+      tl.fromTo("#s4 .sc", { opacity: 0 }, { opacity: 1, duration: 0.4, ease: "power1.out" }, 17.5);
+      tl.fromTo("#door", { strokeDashoffset: 1 }, { strokeDashoffset: 0, duration: 0.9, ease: "power2.inOut" }, 17.65);
+      tl.fromTo("#knob", { scale: 0, svgOrigin: "28 25" }, { scale: 1, svgOrigin: "28 25", duration: 0.45, ease: "back.out(2.4)" }, 18.45);
+      tl.fromTo("#word", { opacity: 0, x: -30 }, { opacity: 1, x: 0, duration: 0.7, ease: "power3.out" }, 18.3);
+      tl.fromTo("#tag1", { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: 0.6, ease: "power3.out" }, 19.1);
+      tl.fromTo("#tag2", { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: 0.6, ease: "power3.out" }, 19.66);
+      tl.fromTo("#built", { opacity: 0 }, { opacity: 1, duration: 0.5, ease: "power2.out" }, 19.9);
+      tl.to("#s4 .sc", { opacity: 0, duration: 0.4, ease: "power1.in" }, 21.95);
+
+      window.__timelines["main"] = tl;
+    </script>
+  </body>
+</html>

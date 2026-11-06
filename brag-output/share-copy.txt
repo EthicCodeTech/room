@@ -1,0 +1,1 @@
+Introducing Room: it makes space on your Mac, and tells you exactly what it will do first. Every removal goes to a 7-day undo vault. Built on the Cinnabar design system. @ethiccode.in

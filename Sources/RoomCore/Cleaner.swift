@@ -52,7 +52,7 @@ public final class Cleaner: @unchecked Sendable {
     }
 
     public func execute(_ items: [Candidate], confirmations: Confirmations = .init(),
-                        policy: (Candidate) -> DeletionPolicy = { DeletionPolicy.default(for: $0.tier) },
+                        policy: (Candidate) -> DeletionPolicy = { DeletionPolicy.default(for: $0) },
                         progress: (@Sendable (String) -> Void)? = nil) -> CleanReport {
         let before = FreeSpace.available(at: home)
         var results: [CleanItemResult] = []

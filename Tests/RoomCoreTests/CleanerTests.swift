@@ -29,6 +29,22 @@ import Foundation
         #expect(sb.exists("Downloads/precious.bin"))
     }
 
+    @Test func detectedInstallersAndZipsWaitInTheVaultEvenThoughRebuildable() throws {
+        let sb = try Sandbox(); let (cleaner, vault, _) = try make(sb)
+        let zip = try sb.file("Downloads/app.zip", bytes: 20_000)
+        let dmg = try sb.file("Downloads/tool.dmg", bytes: 20_000)
+        let cache = try sb.file("Library/Caches/x/blob", bytes: 20_000)
+        let items = [sb.candidate("z", tier: .rebuildable, targets: [zip], ruleID: "detect.zip-duplicate"),
+                     sb.candidate("i", tier: .rebuildable, targets: [dmg], ruleID: "detect.installer"),
+                     sb.candidate("c", tier: .safe, targets: [cache])]
+        let r = cleaner.execute(items)
+        #expect(r.results.map(\.status) == [.vaulted(days: 7), .vaulted(days: 7), .deleted])
+        #expect(vault.list().count == 2, "the two files are recoverable; the cache is simply gone")
+        #expect(!sb.exists("Downloads/app.zip"))
+        _ = try cleaner.restore(try #require(vault.list().first(where: { $0.entries.first?.ruleID == "detect.zip-duplicate" })))
+        #expect(sb.exists("Downloads/app.zip"))
+    }
+
     @Test func confirmedYoursGoesToTheVaultAndRestoresExactly() throws {
         let sb = try Sandbox(); let (cleaner, vault, log) = try make(sb)
         let f = try sb.file("Downloads/precious.bin", bytes: 50_000)

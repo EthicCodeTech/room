@@ -1,0 +1,867 @@
+{
+  "ok": true,
+  "strict": false,
+  "browserSkipped": false,
+  "lint": {
+    "ok": true,
+    "errorCount": 0,
+    "warningCount": 4,
+    "infoCount": 0,
+    "findings": [
+      {
+        "code": "nested_structure_needs_subcomposition",
+        "severity": "warning",
+        "message": "<section id=\"s1\"> is a timeline element that contains nested <div>. The timeline shows one row per top-level element, and the root composition is built only from sub-compositions.",
+        "selector": "#s1",
+        "dataAttributes": {},
+        "sourceFile": "/Users/mrtag08/Projects/galaxys25/Room/brag-output/composition/index.html",
+        "bbox": {
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0
+        },
+        "time": 0,
+        "fixHint": "Move <section id=\"s1\"> and its contents into a sub-composition file and mount it with data-composition-src."
+      },
+      {
+        "code": "nested_structure_needs_subcomposition",
+        "severity": "warning",
+        "message": "<section id=\"s2\"> is a timeline element that contains nested <div>. The timeline shows one row per top-level element, and the root composition is built only from sub-compositions.",
+        "selector": "#s2",
+        "dataAttributes": {},
+        "sourceFile": "/Users/mrtag08/Projects/galaxys25/Room/brag-output/composition/index.html",
+        "bbox": {
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0
+        },
+        "time": 0,
+        "fixHint": "Move <section id=\"s2\"> and its contents into a sub-composition file and mount it with data-composition-src."
+      },
+      {
+        "code": "nested_structure_needs_subcomposition",
+        "severity": "warning",
+        "message": "<section id=\"s3\"> is a timeline element that contains nested <div>. The timeline shows one row per top-level element, and the root composition is built only from sub-compositions.",
+        "selector": "#s3",
+        "dataAttributes": {},
+        "sourceFile": "/Users/mrtag08/Projects/galaxys25/Room/brag-output/composition/index.html",
+        "bbox": {
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0
+        },
+        "time": 0,
+        "fixHint": "Move <section id=\"s3\"> and its contents into a sub-composition file and mount it with data-composition-src."
+      },
+      {
+        "code": "nested_structure_needs_subcomposition",
+        "severity": "warning",
+        "message": "<section id=\"s4\"> is a timeline element that contains nested <div>. The timeline shows one row per top-level element, and the root composition is built only from sub-compositions.",
+        "selector": "#s4",
+        "dataAttributes": {},
+        "sourceFile": "/Users/mrtag08/Projects/galaxys25/Room/brag-output/composition/index.html",
+        "bbox": {
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0
+        },
+        "time": 0,
+        "fixHint": "Move <section id=\"s4\"> and its contents into a sub-composition file and mount it with data-composition-src."
+      }
+    ],
+    "filesScanned": 1
+  },
+  "runtime": {
+    "ok": true,
+    "errorCount": 0,
+    "warningCount": 0,
+    "infoCount": 0,
+    "findings": []
+  },
+  "layout": {
+    "ok": true,
+    "errorCount": 0,
+    "warningCount": 0,
+    "infoCount": 6,
+    "findings": [
+      {
+        "code": "content_overlap",
+        "severity": "info",
+        "time": 13.39,
+        "selector": "#h2b",
+        "message": "Two text blocks overlap and may render unreadable.",
+        "rect": {
+          "left": 160,
+          "top": 346,
+          "right": 664.08,
+          "bottom": 521.88,
+          "width": 504.08,
+          "height": 175.88
+        },
+        "containerSelector": "#h3",
+        "text": "You approve. Then it cleans.",
+        "fixHint": "Give each block its own zone, or put data-layout-allow-overlap on the text or on a container inside the scene. A marker on the scene root does not apply.",
+        "dataAttributes": {},
+        "sourceFile": "index.html",
+        "bbox": {
+          "x": 160,
+          "y": 346,
+          "width": 504.08,
+          "height": 175.88
+        },
+        "firstSeen": 13.39,
+        "lastSeen": 13.39,
+        "occurrences": 1,
+        "heldMs": 0,
+        "times": [
+          13.39
+        ]
+      },
+      {
+        "code": "content_overlap",
+        "severity": "info",
+        "time": 13.39,
+        "selector": "div.nav > div:nth-of-type(2) > span:nth-of-type(1)",
+        "message": "Two text blocks overlap and may render unreadable.",
+        "rect": {
+          "left": 825,
+          "top": 293,
+          "right": 918.39,
+          "bottom": 321,
+          "width": 93.39,
+          "height": 28
+        },
+        "containerSelector": "#v-title",
+        "text": "Overview",
+        "fixHint": "Give each block its own zone, or put data-layout-allow-overlap on the text or on a container inside the scene. A marker on the scene root does not apply.",
+        "dataAttributes": {},
+        "sourceFile": "index.html",
+        "bbox": {
+          "x": 825,
+          "y": 293,
+          "width": 93.39,
+          "height": 28
+        },
+        "firstSeen": 13.39,
+        "lastSeen": 13.39,
+        "occurrences": 1,
+        "heldMs": 0,
+        "times": [
+          13.39
+        ]
+      },
+      {
+        "code": "content_overlap",
+        "severity": "info",
+        "time": 13.39,
+        "selector": "div.nav-item.sel > span:nth-of-type(1)",
+        "message": "Two text blocks overlap and may render unreadable.",
+        "rect": {
+          "left": 825,
+          "top": 349,
+          "right": 895.83,
+          "bottom": 377,
+          "width": 70.83,
+          "height": 28
+        },
+        "containerSelector": "#v-sub",
+        "text": "Review",
+        "fixHint": "Give each block its own zone, or put data-layout-allow-overlap on the text or on a container inside the scene. A marker on the scene root does not apply.",
+        "dataAttributes": {},
+        "sourceFile": "index.html",
+        "bbox": {
+          "x": 825,
+          "y": 349,
+          "width": 70.83,
+          "height": 28
+        },
+        "firstSeen": 13.39,
+        "lastSeen": 13.39,
+        "occurrences": 1,
+        "heldMs": 0,
+        "times": [
+          13.39
+        ]
+      },
+      {
+        "code": "content_overlap",
+        "severity": "info",
+        "time": 13.39,
+        "selector": "div.nav > div:nth-of-type(5) > span:nth-of-type(1)",
+        "message": "Two text blocks overlap and may render unreadable.",
+        "rect": {
+          "left": 825,
+          "top": 461,
+          "right": 878.05,
+          "bottom": 489,
+          "width": 53.05,
+          "height": 28
+        },
+        "containerSelector": "#v-num",
+        "text": "Vault",
+        "fixHint": "Give each block its own zone, or put data-layout-allow-overlap on the text or on a container inside the scene. A marker on the scene root does not apply.",
+        "dataAttributes": {},
+        "sourceFile": "index.html",
+        "bbox": {
+          "x": 825,
+          "y": 461,
+          "width": 53.05,
+          "height": 28
+        },
+        "firstSeen": 13.39,
+        "lastSeen": 13.39,
+        "occurrences": 1,
+        "heldMs": 0,
+        "times": [
+          13.39
+        ]
+      },
+      {
+        "code": "content_overlap",
+        "severity": "info",
+        "time": 13.39,
+        "selector": "#r4 > div:nth-of-type(2) > b:nth-of-type(1)",
+        "message": "Two text blocks overlap and may render unreadable.",
+        "rect": {
+          "left": 1126,
+          "top": 337.95,
+          "right": 1438.31,
+          "bottom": 368.95,
+          "width": 312.31,
+          "height": 31
+        },
+        "containerSelector": "#v-sub",
+        "text": "node_modules · old project",
+        "fixHint": "Give each block its own zone, or put data-layout-allow-overlap on the text or on a container inside the scene. A marker on the scene root does not apply.",
+        "dataAttributes": {},
+        "sourceFile": "index.html",
+        "bbox": {
+          "x": 1126,
+          "y": 337.95,
+          "width": 312.31,
+          "height": 31
+        },
+        "firstSeen": 13.39,
+        "lastSeen": 13.39,
+        "occurrences": 1,
+        "heldMs": 0,
+        "times": [
+          13.39
+        ]
+      },
+      {
+        "code": "content_overlap",
+        "severity": "info",
+        "time": 13.39,
+        "selector": "div.chip.pend",
+        "message": "Two text blocks overlap and may render unreadable.",
+        "rect": {
+          "left": 1579,
+          "top": 358,
+          "right": 1621,
+          "bottom": 376,
+          "width": 42,
+          "height": 18
+        },
+        "containerSelector": "#v-sub",
+        "text": "Check",
+        "fixHint": "Give each block its own zone, or put data-layout-allow-overlap on the text or on a container inside the scene. A marker on the scene root does not apply.",
+        "dataAttributes": {},
+        "sourceFile": "index.html",
+        "bbox": {
+          "x": 1579,
+          "y": 358,
+          "width": 42,
+          "height": 18
+        },
+        "firstSeen": 13.39,
+        "lastSeen": 13.39,
+        "occurrences": 1,
+        "heldMs": 0,
+        "times": [
+          13.39
+        ]
+      }
+    ],
+    "duration": 22.4,
+    "samples": [
+      1.244,
+      3.733,
+      6.222,
+      8.711,
+      11.2,
+      13.689,
+      16.178,
+      18.667,
+      21.156
+    ],
+    "transitionSamples": [],
+    "transitionSamplesDropped": 0,
+    "tolerance": 2,
+    "totalIssueCount": 6,
+    "truncated": false
+  },
+  "motion": {
+    "ok": true,
+    "errorCount": 0,
+    "warningCount": 0,
+    "infoCount": 0,
+    "findings": [],
+    "enabled": false,
+    "samples": 0
+  },
+  "contrast": {
+    "ok": true,
+    "errorCount": 0,
+    "warningCount": 1,
+    "infoCount": 0,
+    "findings": [
+      {
+        "code": "contrast_aa_failure",
+        "severity": "warning",
+        "message": "Contrast is 4.38:1; WCAG AA requires 4.5:1.",
+        "text": "Delete 3 items",
+        "fg": "rgb(247,247,245)",
+        "bg": "rgb(225,29,72)",
+        "ratio": 4.38,
+        "requiredRatio": 4.5,
+        "suggestedColor": "rgb(251,251,249)",
+        "large": false,
+        "selector": "#del",
+        "dataAttributes": {},
+        "sourceFile": "index.html",
+        "bbox": {
+          "x": 1552,
+          "y": 832.8206787109375,
+          "width": 220,
+          "height": 52
+        },
+        "time": 11.2,
+        "times": [
+          11.2
+        ]
+      }
+    ],
+    "enabled": true,
+    "samples": [
+      1.244,
+      6.222,
+      11.2,
+      16.178,
+      21.156
+    ],
+    "checked": 80,
+    "passed": 79
+  },
+  "craft": {
+    "ok": true,
+    "errorCount": 0,
+    "warningCount": 5,
+    "infoCount": 0,
+    "findings": [
+      {
+        "code": "first_frame_empty",
+        "severity": "warning",
+        "message": "Frame 0 shows only the background, and the first frame is the thumbnail on social players: have the title or key image already on screen at 0 s instead of entering from nothing; see references/review.md.",
+        "selector": "[data-composition-id]",
+        "dataAttributes": {},
+        "sourceFile": "index.html",
+        "bbox": {
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0
+        },
+        "time": 0
+      },
+      {
+        "code": "text_below_floor",
+        "severity": "warning",
+        "message": "Type floor is 28 px (2.6% of the 1080 px short side, what a phone can read) and 48 text elements stay under it for 0.5 s or more, the smallest \"Free space\" at 13 px: set reading text to at least 28 px, or put data-layout-ignore on text that is texture rather than reading; see references/look.md.",
+        "text": "Free space",
+        "selector": "#mini-cap",
+        "dataAttributes": {},
+        "sourceFile": "index.html",
+        "bbox": {
+          "x": 844.19,
+          "y": 894.22,
+          "width": 93.61,
+          "height": 17
+        },
+        "time": 4.356,
+        "times": [
+          0.373,
+          4.356,
+          4.356,
+          4.356,
+          4.356,
+          4.356,
+          4.356,
+          4.356,
+          4.356,
+          4.356,
+          4.853,
+          5.102,
+          5.102,
+          5.102,
+          5.102,
+          5.476,
+          5.476,
+          5.476,
+          5.476,
+          6.222,
+          6.222,
+          6.222,
+          6.222,
+          6.72,
+          6.72,
+          6.72,
+          6.72,
+          7.342,
+          11.076,
+          11.076,
+          11.822,
+          13.44,
+          13.44,
+          13.813,
+          13.813,
+          13.813,
+          13.813,
+          13.938,
+          14.311,
+          14.311,
+          14.311,
+          14.311,
+          14.933,
+          14.933,
+          14.933,
+          14.933,
+          16.053,
+          20.658
+        ],
+        "fontPx": 13,
+        "floorPx": 28,
+        "seconds": 9.084,
+        "elements": [
+          {
+            "selector": "#mini-cap",
+            "text": "Free space",
+            "fontPx": 13,
+            "time": 4.356,
+            "seconds": 9.084
+          },
+          {
+            "selector": "#hdr-label",
+            "text": "Review",
+            "fontPx": 14,
+            "time": 4.356,
+            "seconds": 9.084
+          },
+          {
+            "selector": "#r1 > div:nth-of-type(3)",
+            "text": "Safe",
+            "fontPx": 14,
+            "time": 5.102,
+            "seconds": 6.844
+          },
+          {
+            "selector": "#r2 > div:nth-of-type(3)",
+            "text": "Safe",
+            "fontPx": 14,
+            "time": 5.476,
+            "seconds": 6.595
+          },
+          {
+            "selector": "#r3 > div:nth-of-type(3)",
+            "text": "Safe",
+            "fontPx": 14,
+            "time": 6.222,
+            "seconds": 5.849
+          },
+          {
+            "selector": "div.chip.pend",
+            "text": "Check",
+            "fontPx": 14,
+            "time": 6.72,
+            "seconds": 6.72
+          },
+          {
+            "selector": "#vr1 > div:nth-of-type(1) > em:nth-of-type(1)",
+            "text": "removed just now · 7 days left",
+            "fontPx": 15,
+            "time": 13.813,
+            "seconds": 3.982
+          },
+          {
+            "selector": "#vr2 > div:nth-of-type(1) > em:nth-of-type(1)",
+            "text": "removed just now · 7 days left",
+            "fontPx": 15,
+            "time": 14.311,
+            "seconds": 3.484
+          },
+          {
+            "selector": "#vr3 > div:nth-of-type(1) > em:nth-of-type(1)",
+            "text": "removed just now · 7 days left",
+            "fontPx": 15,
+            "time": 14.933,
+            "seconds": 2.862
+          },
+          {
+            "selector": "#r1 > div:nth-of-type(2) > em:nth-of-type(1)",
+            "text": "Rebuilt automatically the next time you build.",
+            "fontPx": 16,
+            "time": 5.102,
+            "seconds": 6.844
+          },
+          {
+            "selector": "#r2 > div:nth-of-type(2) > em:nth-of-type(1)",
+            "text": "Runtimes you have not booted in 90 days.",
+            "fontPx": 16,
+            "time": 5.476,
+            "seconds": 6.595
+          },
+          {
+            "selector": "#r3 > div:nth-of-type(2) > em:nth-of-type(1)",
+            "text": "Layers Docker recreates when it needs them.",
+            "fontPx": 16,
+            "time": 6.222,
+            "seconds": 5.849
+          },
+          {
+            "selector": "em.warn",
+            "text": "It is not backed up: 2 unpushed commits",
+            "fontPx": 16,
+            "time": 6.72,
+            "seconds": 6.72
+          },
+          {
+            "selector": "#more",
+            "text": "and 6 more in Review",
+            "fontPx": 16,
+            "time": 7.342,
+            "seconds": 4.48
+          },
+          {
+            "selector": "#toast > em:nth-of-type(1)",
+            "text": "Changed your mind? Undo here.",
+            "fontPx": 18,
+            "time": 11.822,
+            "seconds": 1.618
+          },
+          {
+            "selector": "#vr1 > div:nth-of-type(3)",
+            "text": "Undo",
+            "fontPx": 18,
+            "time": 13.813,
+            "seconds": 3.982
+          },
+          {
+            "selector": "#u2a",
+            "text": "Undo",
+            "fontPx": 18,
+            "time": 14.311,
+            "seconds": 1.617
+          },
+          {
+            "selector": "#vr3 > div:nth-of-type(3)",
+            "text": "Undo",
+            "fontPx": 18,
+            "time": 14.933,
+            "seconds": 2.862
+          },
+          {
+            "selector": "#u2b",
+            "text": "Restored",
+            "fontPx": 18,
+            "time": 16.053,
+            "seconds": 1.742
+          },
+          {
+            "selector": "#del",
+            "text": "Delete 3 items",
+            "fontPx": 19.76,
+            "time": 11.076,
+            "seconds": 0.87
+          },
+          {
+            "selector": "div.nav > div:nth-of-type(2) > span:nth-of-type(1)",
+            "text": "Overview",
+            "fontPx": 20,
+            "time": 4.356,
+            "seconds": 9.084
+          },
+          {
+            "selector": "div.nav-item.sel > span:nth-of-type(1)",
+            "text": "Review",
+            "fontPx": 20,
+            "time": 4.356,
+            "seconds": 9.084
+          },
+          {
+            "selector": "div.nav > div:nth-of-type(4) > span:nth-of-type(1)",
+            "text": "Map",
+            "fontPx": 20,
+            "time": 4.356,
+            "seconds": 9.084
+          },
+          {
+            "selector": "div.nav > div:nth-of-type(5) > span:nth-of-type(1)",
+            "text": "Vault",
+            "fontPx": 20,
+            "time": 4.356,
+            "seconds": 9.084
+          },
+          {
+            "selector": "div.nav > div:nth-of-type(6) > span:nth-of-type(1)",
+            "text": "Ask",
+            "fontPx": 20,
+            "time": 4.356,
+            "seconds": 9.084
+          },
+          {
+            "selector": "#mini-free",
+            "text": "4.2 GB free",
+            "fontPx": 20,
+            "time": 4.356,
+            "seconds": 9.084
+          },
+          {
+            "selector": "span.sel",
+            "text": "3 selected · 31.2 GB",
+            "fontPx": 20,
+            "time": 11.076,
+            "seconds": 0.87
+          },
+          {
+            "selector": "#v-sub",
+            "text": "Anything of yours that you delete waits here for 7 days. The space only comes back when the vault is emptied.",
+            "fontPx": 20,
+            "time": 13.44,
+            "seconds": 4.355
+          },
+          {
+            "selector": "#v-total > small:nth-of-type(1)",
+            "text": "waiting",
+            "fontPx": 20,
+            "time": 13.44,
+            "seconds": 4.355
+          },
+          {
+            "selector": "#s1-label",
+            "text": "Macintosh HD",
+            "fontPx": 22,
+            "time": 0.373,
+            "seconds": 3.858
+          },
+          {
+            "selector": "#r1 > div:nth-of-type(2) > b:nth-of-type(1)",
+            "text": "Xcode DerivedData",
+            "fontPx": 22,
+            "time": 5.102,
+            "seconds": 6.844
+          },
+          {
+            "selector": "#r1 > div:nth-of-type(4)",
+            "text": "14.2 GB",
+            "fontPx": 22,
+            "time": 5.102,
+            "seconds": 6.844
+          },
+          {
+            "selector": "#r2 > div:nth-of-type(2) > b:nth-of-type(1)",
+            "text": "Simulator caches",
+            "fontPx": 22,
+            "time": 5.476,
+            "seconds": 6.595
+          },
+          {
+            "selector": "#r2 > div:nth-of-type(4)",
+            "text": "9.8 GB",
+            "fontPx": 22,
+            "time": 5.476,
+            "seconds": 6.595
+          },
+          {
+            "selector": "#r3 > div:nth-of-type(2) > b:nth-of-type(1)",
+            "text": "Docker build cache",
+            "fontPx": 22,
+            "time": 6.222,
+            "seconds": 5.849
+          },
+          {
+            "selector": "#r3 > div:nth-of-type(4)",
+            "text": "7.2 GB",
+            "fontPx": 22,
+            "time": 6.222,
+            "seconds": 5.849
+          },
+          {
+            "selector": "#r4 > div:nth-of-type(2) > b:nth-of-type(1)",
+            "text": "node_modules · old project",
+            "fontPx": 22,
+            "time": 6.72,
+            "seconds": 6.72
+          },
+          {
+            "selector": "#r4 > div:nth-of-type(4)",
+            "text": "3.9 GB",
+            "fontPx": 22,
+            "time": 6.72,
+            "seconds": 6.72
+          },
+          {
+            "selector": "#vr1 > div:nth-of-type(1) > b:nth-of-type(1)",
+            "text": "Xcode DerivedData",
+            "fontPx": 22,
+            "time": 13.813,
+            "seconds": 3.982
+          },
+          {
+            "selector": "#vr1 > div:nth-of-type(2)",
+            "text": "14.2 GB",
+            "fontPx": 22,
+            "time": 13.813,
+            "seconds": 3.982
+          },
+          {
+            "selector": "#h3-sub",
+            "text": "Undo vault",
+            "fontPx": 22,
+            "time": 13.938,
+            "seconds": 3.857
+          },
+          {
+            "selector": "#vr2 > div:nth-of-type(1) > b:nth-of-type(1)",
+            "text": "Simulator caches",
+            "fontPx": 22,
+            "time": 14.311,
+            "seconds": 3.484
+          },
+          {
+            "selector": "#vr2 > div:nth-of-type(2)",
+            "text": "9.8 GB",
+            "fontPx": 22,
+            "time": 14.311,
+            "seconds": 3.484
+          },
+          {
+            "selector": "#vr3 > div:nth-of-type(1) > b:nth-of-type(1)",
+            "text": "Docker build cache",
+            "fontPx": 22,
+            "time": 14.933,
+            "seconds": 2.862
+          },
+          {
+            "selector": "#vr3 > div:nth-of-type(2)",
+            "text": "7.2 GB",
+            "fontPx": 22,
+            "time": 14.933,
+            "seconds": 2.862
+          },
+          {
+            "selector": "#built",
+            "text": "Built on Cinnabar · EthicCode",
+            "fontPx": 24,
+            "time": 20.658,
+            "seconds": 1.617
+          },
+          {
+            "selector": "div.brand > span:nth-of-type(1)",
+            "text": "room",
+            "fontPx": 26,
+            "time": 4.356,
+            "seconds": 9.084
+          },
+          {
+            "selector": "#h2a-sub",
+            "text": "Every item. Every reason.",
+            "fontPx": 26,
+            "time": 4.853,
+            "seconds": 3.858
+          }
+        ]
+      },
+      {
+        "code": "line_unread",
+        "severity": "warning",
+        "message": "\"Room can free 7.2 GB without touching your files.\" (10 words) is on screen 1.40 s (±0.01 s), under its 2.63 s floor: hold it about 0.5 s + 0.3 s a word (3.50 s here) before it leaves or changes; see references/motion.md.",
+        "text": "Room can free 7.2 GB without touching your files.",
+        "selector": "#hdrB",
+        "dataAttributes": {},
+        "sourceFile": "index.html",
+        "bbox": {
+          "x": 1053,
+          "y": 209,
+          "width": 696.5799999999999,
+          "height": 83.38999999999999
+        },
+        "time": 11.939,
+        "words": 10,
+        "seconds": 1.4,
+        "floorSeconds": 2.625
+      },
+      {
+        "code": "line_unread",
+        "severity": "warning",
+        "message": "\"Anything of yours that you delete waits here for 7 days. ...\" (21 words) is on screen 4.29 s (±0.01 s), under its 5.10 s floor: hold it about 0.5 s + 0.3 s a word (6.80 s here) before it leaves or changes; see references/motion.md.",
+        "text": "Anything of yours that you delete waits here for 7 days. The space only comes back when the vault is emptied.",
+        "selector": "#v-sub",
+        "dataAttributes": {},
+        "sourceFile": "index.html",
+        "bbox": {
+          "x": 825,
+          "y": 335.22,
+          "width": 839.5900000000001,
+          "height": 56
+        },
+        "time": 13.44,
+        "words": 21,
+        "seconds": 4.293,
+        "floorSeconds": 5.1
+      },
+      {
+        "code": "line_unread",
+        "severity": "warning",
+        "message": "The film's last line \"BUILT ON CINNABAR · ETHICCODE\" (4 words) is on screen 1.63 s (±0.01 s), under the 2.00 s a closing line needs: hold it about 0.5 s + 0.3 s a word and at least 2 s before the film ends; see references/motion.md.",
+        "text": "BUILT ON CINNABAR · ETHICCODE",
+        "selector": "#built",
+        "dataAttributes": {},
+        "sourceFile": "index.html",
+        "bbox": {
+          "x": 702.47,
+          "y": 766,
+          "width": 515.05,
+          "height": 31
+        },
+        "time": 20.635,
+        "words": 4,
+        "seconds": 1.634,
+        "floorSeconds": 2
+      }
+    ],
+    "enabled": true,
+    "step": 0.12400000000000055,
+    "samples": 180
+  },
+  "audio": {
+    "ok": true,
+    "errorCount": 0,
+    "warningCount": 0,
+    "infoCount": 0,
+    "findings": []
+  },
+  "hdr": {
+    "autoPromotion": null,
+    "inspection": "available"
+  },
+  "snapshots": {
+    "enabled": false,
+    "files": [],
+    "times": [],
+    "findingFiles": []
+  }
+}
