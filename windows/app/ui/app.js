@@ -304,13 +304,16 @@ async function mapOpen(path, name, mode = "push") {
   const m = S.map;
   if (mode === "push") m.stack.push({ path, name });
   m.loading = true; m.stopped = false; m.elapsed = 0; m.tree = null; render();
-  clearInterval(m.timer); const t0 = Date.now();
-  m.timer = setInterval(() => { m.elapsed = Math.floor((Date.now() - t0) / 1000); const el = $("#map-wait"); if (el) el.textContent = `Measuring ${name} · ${m.elapsed}s`; }, 500);
+  clearInterval(m.timer); const t0 = Date.now(); let seen = { files: 0, bytes: 0 };
+  const paint = () => { const el = $("#map-wait"); if (el) el.textContent = `Measuring ${name} · ${Math.floor((Date.now() - t0) / 1000)}s${seen.files ? ` · ${seen.files.toLocaleString()} files · ${fmt(seen.bytes)} so far` : ""}`; };
+  m.timer = setInterval(paint, 500);
+  const stop = await listen("map-progress", (e) => { seen = e.payload; paint(); });
   try {
     const cached = m.cache.get(path);
     m.tree = cached || await invoke("map_tree", { path });
     if (!cached && !m.stopped) m.cache.set(path, m.tree);
   } catch (e) { toast("Couldn't read that folder", String(e), true); m.stack.pop(); }
+  finally { stop?.(); }
   clearInterval(m.timer); m.loading = false; render();
 }
 const mapTop = () => S.map.stack.at(-1);
@@ -341,7 +344,8 @@ function viewMap() {
   else if (!m.tree || !m.tree.children.length) body = `<div class="card empty">${icon("folder-open", 32)}<div>Nothing here.</div></div>`;
   else if (m.mode === "list") body = mapTable();
   else body = `<div class="map" id="mapbox"></div><div class="mapstatus" id="mapstatus">${mapSummary()}</div>`;
-  return `${head}<div class="crumbs">${crumbs}</div>${tools}${body}`;
+  const sxs = /[\\/]winsxs$/i.test(mapTop().path) ? `<div class="notice">${icon("info", 18)}<div>Windows shares these files with other folders (hard links), so the sizes here look bigger than what is really used. To free space, use Windows' own cleanup rather than deleting anything in here.</div></div>` : "";
+  return `${head}<div class="crumbs">${crumbs}</div>${tools}${sxs}${body}`;
 }
 const mapSummary = () => { const t = S.map.tree; return t ? `<b>${esc(t.name)}</b> · ${fmt(t.bytes)} in ${t.files.toLocaleString()} files${S.map.stopped ? " · stopped early, so this is partial" : ""}. Click a folder to look inside, a file to show it in Explorer.` : ""; };
 
@@ -350,7 +354,7 @@ function sortedChildren() {
   return [...S.map.tree.children].sort((a, b) => k === "name" ? d * a.name.localeCompare(b.name) : k === "files" ? d * (a.files - b.files) : d * (a.bytes - b.bytes));
 }
 function mapTable() {
-  const t = S.map.tree, kids = sortedChildren(), max = Math.max(...kids.map((c) => c.bytes), 1);
+  const t = S.map.tree, all = sortedChildren(), kids = all.slice(0, 1000), max = Math.max(...kids.map((c) => c.bytes), 1);
   const arrow = (k) => S.map.sort.k === k ? (S.map.sort.d < 0 ? " ↓" : " ↑") : "";
   const row = (c) => {
     const open = c.kind === "dir" ? `data-act="map-open" data-path="${esc(c.path)}" data-name="${esc(c.name)}"` : c.kind === "file" ? `data-act="reveal" data-path="${esc(c.path)}"` : "";
@@ -358,34 +362,51 @@ function mapTable() {
       <td style="width:26%"><div class="bar"><i style="width:${(c.bytes / max) * 100}%"></i></div></td><td class="r">${fmt(c.bytes)}</td><td class="r">${((c.bytes / t.bytes) * 100).toFixed(1)}%</td><td class="r">${c.kind === "dir" || c.kind === "files" || c.kind === "other" ? c.files.toLocaleString() : ""}</td></tr>`;
   };
   return `<div class="card tight"><table class="table"><thead><tr><th data-act="map-sort" data-k="name">Name${arrow("name")}</th><th></th><th class="r" data-act="map-sort" data-k="bytes">Size${arrow("bytes")}</th><th class="r">Share</th><th class="r" data-act="map-sort" data-k="files">Files${arrow("files")}</th></tr></thead><tbody>${kids.map(row).join("")}</tbody></table></div>
-    <div class="mapstatus">${mapSummary()}</div>`;
+    <div class="mapstatus">${all.length > kids.length ? `Showing the ${kids.length.toLocaleString()} biggest of ${all.length.toLocaleString()}. ` : ""}${mapSummary()}</div>`;
 }
 
-function cellHtml(n, x, y, w, h, color, depth, i) {
-  const open = n.kind === "dir" ? `data-act="map-open" data-path="${esc(n.path)}" data-name="${esc(n.name)}"` : n.kind === "file" ? `data-act="reveal" data-path="${esc(n.path)}"` : "";
+// Blocks too small to read are merged into one "smaller items" block, so the map never turns into dots.
+function fitItems(items, w, h, minArea, maxCount) {
+  const total = sum(items, (i) => i.bytes);
+  if (!total) return [];
+  const area = w * h, keep = [];
+  let lump = null;
+  const count = (it) => (it.kind === "other" || it.kind === "files") ? (parseInt(it.name.replace(/[^0-9]/g, ""), 10) || 1) : 1;
+  for (const it of [...items].sort((a, b) => b.bytes - a.bytes)) {
+    if (keep.length < maxCount && (it.bytes / total) * area >= minArea) { keep.push(it); continue; }
+    lump ??= { name: "", path: "", bytes: 0, kind: "other", files: 0, children: [], n: 0 };
+    lump.bytes += it.bytes; lump.files += it.files; lump.n += count(it);
+  }
+  if (lump) { lump.name = `${lump.n.toLocaleString()} smaller items`; keep.push(lump); }
+  return keep;
+}
+const radius = (w, h) => Math.max(2, Math.min(8, Math.min(w, h) / 7));
+
+function cellHtml(n, x, y, w, h, color, depth) {
+  const open = n.kind === "dir" ? `data-act="map-open" data-path="${esc(n.path)}" data-name="${esc(n.name)}"` : n.kind === "file" ? `data-act="reveal" data-path="${esc(n.path)}"` : n.kind === "other" && depth === 0 ? `data-act="map-list" title="Click to list them all"` : "";
   const fs = Math.max(10, Math.min(14, Math.min(w / 9, h / 2.6)));
   const showName = w > 44 && h > 20, showSize = w > 74 && h > 36;
   const hasKids = n.kind === "dir" && n.children?.length && w > 120 && h > 84 && depth === 0;
   let inner = "";
   if (hasKids) {
-    const kids = squarify(n.children, w - 8, h - 30);
-    inner = kids.map((k, j) => cellHtml(k, k.x + 4, k.y + 26, k.w, k.h, `color-mix(in srgb, ${color} ${j % 2 ? 62 : 74}%, white)`, 1, j)).join("");
+    const kids = squarify(fitItems(n.children, w - 8, h - 30, 520, 24), w - 8, h - 30);
+    inner = kids.map((k, j) => cellHtml(k, k.x + 4, k.y + 26, k.w, k.h, `color-mix(in srgb, ${color} ${j % 2 ? 62 : 74}%, white)`, 1)).join("");
   }
   const cls = `cell${n.kind === "files" || n.kind === "other" ? " lump" : ""}${hasKids ? "" : " leaf"}`;
-  return `<div class="${cls}" ${open} style="left:${x}px;top:${y}px;width:${Math.max(0, w - 2)}px;height:${Math.max(0, h - 2)}px;background:${color};font-size:${fs}px;--i:${i}" data-name="${esc(n.name)}" data-bytes="${n.bytes}" data-files="${n.files}">
-    ${showName ? `<span class="hd">${esc(n.name)}${hasKids || !showSize ? "" : ""}${showSize || hasKids ? `<small>${fmt(n.bytes)}</small>` : ""}</span>` : ""}${inner}</div>`;
+  return `<div class="${cls}" ${open} style="left:${x}px;top:${y}px;width:${Math.max(0, w - 2)}px;height:${Math.max(0, h - 2)}px;background:${color};font-size:${fs}px;border-radius:${radius(w, h)}px" data-name="${esc(n.name)}" data-bytes="${n.bytes}" data-files="${n.files}">
+    ${showName ? `<span class="hd">${esc(n.name)}${showSize || hasKids ? `<small>${fmt(n.bytes)}</small>` : ""}</span>` : ""}${inner}</div>`;
 }
 function layoutMap() {
   const box = $("#mapbox"), t = S.map.tree;
   if (!box || !t) return;
   const W = box.clientWidth, H = box.clientHeight;
-  const items = t.children.map((c) => ({ ...c }));
   const top = mapTop(), drive = S.map.stack.length === 1 ? S.map.drives.find((d) => d.path.toLowerCase() === top.path.toLowerCase()) : null;
+  const items = t.children.map((c) => ({ ...c }));
   if (drive && drive.free > 0) items.push({ name: "Free space", path: "", bytes: drive.free, kind: "free", files: 0, children: [] });
-  const cells = squarify(items, W, H);
+  const cells = squarify(fitItems(items, W, H, 760, 140), W, H);
   box.innerHTML = cells.map((c, i) => {
-    if (c.kind === "free") return `<div class="cell free" style="left:${c.x}px;top:${c.y}px;width:${c.w - 2}px;height:${c.h - 2}px;--i:${i}" data-name="Free space" data-bytes="${c.bytes}" data-files="0"><span class="hd">Free space<small>${fmt(c.bytes)}</small></span></div>`;
-    return cellHtml(c, c.x, c.y, c.w, c.h, PALETTE[i % PALETTE.length], 0, i);
+    if (c.kind === "free") return `<div class="cell free" style="left:${c.x}px;top:${c.y}px;width:${c.w - 2}px;height:${c.h - 2}px;border-radius:${radius(c.w, c.h)}px" data-name="Free space" data-bytes="${c.bytes}" data-files="0"><span class="hd">Free space<small>${fmt(c.bytes)}</small></span></div>`;
+    return cellHtml(c, c.x, c.y, c.w, c.h, PALETTE[i % PALETTE.length], 0);
   }).join("");
 }
 let resizeT;
@@ -517,6 +538,7 @@ document.addEventListener("click", async (e) => {
     case "map-refresh": return mapRefresh();
     case "map-cancel": S.map.stopped = true; return invoke("map_cancel");
     case "map-mode": S.map.mode = d.v; store.set("mapMode", d.v); press($("#modeseg"), el); setTimeout(() => render(), 200); return;
+    case "map-list": S.map.mode = "list"; store.set("mapMode", "list"); return render(true);
     case "map-sort": { const s = S.map.sort; s.d = s.k === d.k ? -s.d : (d.k === "name" ? 1 : -1); s.k = d.k; return render(); }
     case "pick-folder": return pickFolder();
     case "restore":

@@ -39,6 +39,19 @@ pub fn allocated_size(_: &Path, meta: &Metadata) -> u64 { use std::os::unix::fs:
 #[cfg(not(any(windows, unix)))]
 pub fn allocated_size(_: &Path, meta: &Metadata) -> u64 { meta.len() }
 
+/// Like `allocated_size`, but without opening the file: it uses what the directory listing already reported.
+/// Only compressed or sparse files need the exact (slow) call; the rest are rounded up to 4 KB clusters.
+#[cfg(windows)]
+pub fn allocated_size_fast(path: &Path, meta: &Metadata) -> u64 {
+    use std::os::windows::fs::MetadataExt;
+    const COMPRESSED: u32 = 0x800;
+    const SPARSE_FILE: u32 = 0x200;
+    if meta.file_attributes() & (COMPRESSED | SPARSE_FILE) != 0 { return allocated_size(path, meta); }
+    (meta.len() + 4095) & !4095
+}
+#[cfg(not(windows))]
+pub fn allocated_size_fast(path: &Path, meta: &Metadata) -> u64 { allocated_size(path, meta) }
+
 /// Root of the drive holding `path` (`D:\`), or the mount point on other systems.
 #[cfg(windows)]
 pub fn volume_root(path: &Path) -> Option<PathBuf> {

@@ -1,9 +1,9 @@
+use crate::scan::Progress;
 use crate::{platform, scan};
 use rayon::prelude::*;
 use serde::Serialize;
 use std::fs;
 use std::path::{Path, PathBuf};
-use std::sync::atomic::{AtomicBool, Ordering};
 
 #[derive(Clone, Copy, Debug, Serialize, PartialEq, Eq)]
 #[serde(rename_all = "camelCase")]
@@ -33,34 +33,34 @@ pub struct Place { pub name: String, pub path: String }
 
 /// Sizes of a folder and what is inside it, in one walk. `depth` levels of folders keep their children
 /// (the top level also lists its files); anything deeper is summed. Links are not followed, so a junction can't loop.
-/// Stops early, returning what it has, when `cancel` is set.
-pub fn tree(dir: &Path, depth: usize, max_children: usize, cancel: &AtomicBool) -> TreeNode {
-    let mut node = walk(dir, depth.max(1), true, max_children, cancel);
+/// Stops early, returning what it has, when `prog.stop` is set. `prog` also counts files and bytes as it goes.
+pub fn tree(dir: &Path, depth: usize, max_children: usize, prog: &Progress) -> TreeNode {
+    let mut node = walk(dir, depth.max(1), true, max_children, prog);
     node.name = dir.file_name().map(|n| n.to_string_lossy().to_string()).unwrap_or_else(|| dir.to_string_lossy().to_string());
     node.path = dir.to_string_lossy().to_string();
     node
 }
 
-fn walk(dir: &Path, depth: usize, top: bool, max_children: usize, cancel: &AtomicBool) -> TreeNode {
+fn walk(dir: &Path, depth: usize, top: bool, max_children: usize, prog: &Progress) -> TreeNode {
     let mut node = TreeNode { name: dir.file_name().map(|n| n.to_string_lossy().to_string()).unwrap_or_default(), path: dir.to_string_lossy().to_string(),
                               bytes: 0, kind: NodeKind::Dir, files: 0, children: vec![] };
-    if cancel.load(Ordering::Relaxed) { return node; }
+    if prog.stopped() { return node; }
     let Ok(rd) = fs::read_dir(dir) else { return node };
     let entries: Vec<_> = rd.flatten().collect();
     enum Item { Dir(TreeNode), File(PathBuf, String, u64) }
     let items: Vec<Item> = entries.par_iter().filter_map(|e| {
         let path = e.path();
-        let meta = fs::symlink_metadata(&path).ok()?;
+        let meta = e.metadata().ok()?;                      // from the directory listing, no extra system call
         if platform::is_reparse_point(&meta) { return None; }
         let name = e.file_name().to_string_lossy().to_string();
         if meta.is_dir() {
-            if depth > 1 { Some(Item::Dir(walk(&path, depth - 1, false, max_children, cancel))) }
+            if depth > 1 { Some(Item::Dir(walk(&path, depth - 1, false, max_children, prog))) }
             else {
-                let m = scan::measure(&path);
+                let m = scan::measure_with(&path, Some(prog));
                 Some(Item::Dir(TreeNode { name, path: path.to_string_lossy().to_string(), bytes: m.bytes, kind: NodeKind::Dir, files: m.files, children: vec![] }))
             }
         } else if meta.is_file() && !platform::is_cloud_placeholder(&meta) {
-            let size = platform::allocated_size(&path, &meta);
+            let size = scan::measure_file(&path, &meta, Some(prog)).bytes;
             Some(Item::File(path, name, size))
         } else { None }
     }).collect();
