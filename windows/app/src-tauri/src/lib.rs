@@ -33,7 +33,8 @@ struct AppState {
     scorer: Mutex<Scorer>,
     busy: Mutex<bool>,
     effect: Mutex<&'static str>,
-    map_cancel: Arc<AtomicBool>,
+    /// The map walk in progress, so it can be counted and stopped.
+    map_job: Mutex<Option<Arc<room_core::scan::Progress>>>,
 }
 
 fn now() -> i64 { std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).map(|d| d.as_secs() as i64).unwrap_or(0) }
@@ -184,15 +185,31 @@ fn vault_empty(state: State<AppState>) -> usize {
 }
 
 /// One walk: the folder, what is inside it, and one more level of folders inside those.
+/// While it runs, `map-progress` events report how many files and bytes it has seen.
 #[tauri::command]
 async fn map_tree(app: AppHandle, path: String) -> Result<TreeNode, String> {
-    let flag = app.state::<AppState>().map_cancel.clone();
-    flag.store(false, Ordering::Relaxed);
-    tauri::async_runtime::spawn_blocking(move || map::tree(Path::new(&path), 2, 4000, &flag)).await.map_err(|e| e.to_string())
+    let prog = Arc::new(room_core::scan::Progress::default());
+    if let Ok(mut job) = app.state::<AppState>().map_job.lock() { *job = Some(prog.clone()); }
+    let finished = Arc::new(AtomicBool::new(false));
+    {
+        let (prog, finished, app) = (prog.clone(), finished.clone(), app.clone());
+        std::thread::spawn(move || {
+            while !finished.load(Ordering::Relaxed) {
+                let _ = app.emit("map-progress", serde_json::json!({ "files": prog.files.load(Ordering::Relaxed), "bytes": prog.bytes.load(Ordering::Relaxed) }));
+                std::thread::sleep(std::time::Duration::from_millis(250));
+            }
+        });
+    }
+    let walker = prog.clone();
+    let result = tauri::async_runtime::spawn_blocking(move || map::tree(Path::new(&path), 2, 4000, &walker)).await.map_err(|e| e.to_string());
+    finished.store(true, Ordering::Relaxed);
+    result
 }
 
 #[tauri::command]
-fn map_cancel(state: State<AppState>) { state.map_cancel.store(true, Ordering::Relaxed); }
+fn map_cancel(state: State<AppState>) {
+    if let Ok(job) = state.map_job.lock() { if let Some(p) = job.as_ref() { p.stop.store(true, Ordering::Relaxed); } }
+}
 
 #[tauri::command]
 fn list_drives() -> Vec<Drive> { map::drives() }
@@ -254,7 +271,7 @@ pub fn run() {
 
     tauri::Builder::default()
         .plugin(tauri_plugin_dialog::init())
-        .manage(AppState { env, paths, candidates: Mutex::new(vec![]), scorer: Mutex::new(scorer), busy: Mutex::new(false), effect: Mutex::new("none"), map_cancel: Arc::new(AtomicBool::new(false)) })
+        .manage(AppState { env, paths, candidates: Mutex::new(vec![]), scorer: Mutex::new(scorer), busy: Mutex::new(false), effect: Mutex::new("none"), map_job: Mutex::new(None) })
         .setup(|app| {
             let state = app.state::<AppState>();
             let saved = Settings::load(&state.paths.settings()).appearance;

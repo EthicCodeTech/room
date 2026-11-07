@@ -303,7 +303,7 @@ fn the_planner_uses_safe_items_first_and_widens_only_when_it_must() {
 #[test]
 fn the_map_nests_two_levels_lumps_files_and_counts_everything() {
     use room_core::map::{tree, NodeKind};
-    use std::sync::atomic::AtomicBool;
+    use room_core::scan::Progress;
     let dir = tempfile::tempdir().unwrap();
     let root = dir.path();
     file(root, "big/inner/a.bin", 40_000);
@@ -312,7 +312,9 @@ fn the_map_nests_two_levels_lumps_files_and_counts_everything() {
     file(root, "big/d.bin", 5_000);
     file(root, "small/e.bin", 1_000);
     file(root, "top.iso", 70_000);
-    let t = tree(root, 2, 100, &AtomicBool::new(false));
+    let prog = Progress::default();
+    let t = tree(root, 2, 100, &prog);
+    assert_eq!(prog.files.load(std::sync::atomic::Ordering::Relaxed), 6, "progress counts every file");
     let big = t.children.iter().find(|c| c.name == "big").unwrap();
     assert_eq!(big.kind, NodeKind::Dir);
     let inner = big.children.iter().find(|c| c.name == "inner").unwrap();
@@ -329,13 +331,15 @@ fn the_map_nests_two_levels_lumps_files_and_counts_everything() {
 #[test]
 fn the_map_can_be_cancelled_and_caps_long_lists() {
     use room_core::map::{tree, NodeKind};
-    use std::sync::atomic::AtomicBool;
+    use room_core::scan::Progress;
     let dir = tempfile::tempdir().unwrap();
     for i in 0..12 { file(dir.path(), &format!("d{i}/f.bin"), 1000 + i * 10); }
-    let capped = tree(dir.path(), 1, 5, &AtomicBool::new(false));
+    let capped = tree(dir.path(), 1, 5, &Progress::default());
     assert_eq!(capped.children.len(), 6);
     assert_eq!(capped.children.last().unwrap().kind, NodeKind::Other);
     assert_eq!(capped.children.last().unwrap().name, "7 smaller items");
-    let stopped = tree(dir.path(), 2, 100, &AtomicBool::new(true));
+    let halt = Progress::default();
+    halt.stop.store(true, std::sync::atomic::Ordering::Relaxed);
+    let stopped = tree(dir.path(), 2, 100, &halt);
     assert!(stopped.children.is_empty(), "a cancelled walk returns at once");
 }

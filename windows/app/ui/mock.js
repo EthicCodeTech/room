@@ -35,6 +35,14 @@ const sample = (path) => {
   const k = withPaths(kids, path.replace(/\\+$/, ""));
   return { name: path.split(/[\\/]/).filter(Boolean).pop() || path, path, bytes: k.reduce((s, c) => s + c.bytes, 0), kind: "dir", files: k.reduce((s, c) => s + c.files, 0), children: k };
 };
+const stress = (path) => {
+  const kids = [dir("amd64_microsoft-edge-webview_31bf", 0.68), dir("amd64_microsoft-windows-desktop", 0.56), dir("Backup", 0.5), dir("Temp", 0.44)];
+  let r = 7; const rnd = () => (r = (r * 16807) % 2147483647) / 2147483647;
+  for (let i = 0; i < 6000; i++) kids.push(dir(`amd64_microsoft-windows-component-${i}`, 0.0002 + rnd() * rnd() * rnd() * 0.06, [], 12));
+  kids.push({ name: "22098 smaller items", path: "", bytes: 2.8 * GB, kind: "other", files: 90000, children: [] });
+  const k = kids.map((n) => ({ ...n, path: n.path ? path + "\\\\" + n.name : "" }));
+  return { name: "WinSxS", path, bytes: k.reduce((s, c) => s + c.bytes, 0), kind: "dir", files: 364000, children: k };
+};
 const handlers = {
   get_overview: () => overview(),
   save_settings: ({ settings: s }) => { settings = s; return overview(); },
@@ -43,7 +51,7 @@ const handlers = {
   preview_clean: ({ ids }) => { const v = candidates.filter((c) => ids.includes(c.id) && (c.tier === "yours" || ["detect.installer", "detect.zip-duplicate"].includes(c.ruleId))); const d = candidates.filter((c) => ids.includes(c.id) && !v.includes(c)); return { directIds: d.map((c) => c.id), vaultIds: v.map((c) => c.id), directBytes: d.reduce((s, c) => s + c.bytes, 0), vaultBytes: v.reduce((s, c) => s + c.bytes, 0) }; },
   clean: async ({ req }) => { await wait(900); const res = candidates.filter((c) => req.ids.includes(c.id)).map((c) => ({ id: c.id, title: c.title, bytes: c.bytes, status: c.tier === "yours" || c.ruleId === "detect.installer" ? { kind: "vaulted", detail: 7 } : { kind: "deleted" } })); candidates = candidates.filter((c) => !req.ids.includes(c.id)); return { results: res, freeBefore: 42 * GB, freeAfter: 46.5 * GB, measuredFreed: 4.5 * GB, vaultedBytes: 0 }; },
   vault_list: () => vault, vault_restore: ({ id }) => { vault = vault.filter((v) => v.id !== id); return 1; }, vault_purge: ({ id }) => { const v = vault.find((x) => x.id === id); if (v && !v.available) return false; vault = vault.filter((x) => x.id !== id); return true; }, vault_empty: () => { vault = vault.filter((v) => !v.available); return 1; },
-  map_tree: async ({ path }) => { await wait(700); return sample(path); }, map_cancel: () => {}, known_places: () => [{ name: "Home", path: "C:\\Users\\You" }, { name: "Downloads", path: "C:\\Users\\You\\Downloads" }, { name: "Projects", path: "C:\\Users\\You\\Projects" }], set_window_theme: () => "none", list_drives: () => [{ name: "C:", path: "C:\\", free: 42 * GB, total: 494 * GB }, { name: "E:", path: "E:\\", free: 800 * GB, total: 2000 * GB }], home_dir: () => "C:\\Users\\You", reveal: () => {},
+  map_tree: async ({ path }) => { for (let i = 1; i <= 3; i++) { window.__mockEmit?.("map-progress", { files: i * 41000, bytes: i * 9e9 }); await wait(300); } return /winsxs/i.test(path) ? stress(path) : sample(path); }, map_cancel: () => {}, known_places: () => [{ name: "Home", path: "C:\\Users\\You" }, { name: "Downloads", path: "C:\\Users\\You\\Downloads" }, { name: "Projects", path: "C:\\Users\\You\\Projects" }, { name: "WinSxS", path: "C:\\Windows\\WinSxS" }], set_window_theme: () => "none", list_drives: () => [{ name: "C:", path: "C:\\", free: 42 * GB, total: 494 * GB }, { name: "E:", path: "E:\\", free: 800 * GB, total: 2000 * GB }], home_dir: () => "C:\\Users\\You", reveal: () => {},
 };
 const listeners = {};
 window.__mockEmit = (name, payload) => (listeners[name] || []).forEach((f) => f({ payload }));
