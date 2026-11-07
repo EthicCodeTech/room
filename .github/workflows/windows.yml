@@ -57,6 +57,20 @@ jobs:
           cp "target/${{ matrix.target }}/release/room.exe" "../out/Room-1.2.0-${{ matrix.name }}-portable.exe"
           cp target/${{ matrix.target }}/release/bundle/nsis/*.exe "../out/Room-1.2.0-${{ matrix.name }}-setup.exe"
           cd ../out && (sha256sum * > SHA256SUMS-${{ matrix.name }}.txt)
+      - name: Microsoft Store package (.msix)
+        shell: pwsh
+        working-directory: windows
+        run: |
+          $arch = "${{ matrix.name }}"
+          $layout = "msix-layout"
+          New-Item -ItemType Directory -Force $layout | Out-Null
+          Copy-Item "target/${{ matrix.target }}/release/room.exe" "$layout/Room.exe"
+          Copy-Item -Recurse "app/src-tauri/msix/Assets" "$layout/Assets"
+          (Get-Content "app/src-tauri/msix/AppxManifest.xml" -Raw).Replace("{{ARCH}}", $arch).Replace("{{VERSION}}", "1.2.0.0") | Set-Content "$layout/AppxManifest.xml" -Encoding utf8
+          $mk = (Get-ChildItem "C:\Program Files (x86)\Windows Kits\10\bin\*\x64\makeappx.exe" | Sort-Object FullName | Select-Object -Last 1).FullName
+          New-Item -ItemType Directory -Force ../out | Out-Null
+          & $mk pack /d $layout /p "../out/Room-1.2.0-$arch.msix" /o
+          if ($LASTEXITCODE -ne 0) { throw "makeappx failed" }
       - uses: actions/upload-artifact@v4
         with:
           name: room-windows-${{ matrix.name }}
