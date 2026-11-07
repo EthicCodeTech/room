@@ -138,6 +138,9 @@ VIAddVersionKey "ProductVersion" "${VERSION}"
 !define MUI_BGCOLOR "0B0B0D"
 !define MUI_TEXTCOLOR "F7F7F5"
 !define MUI_HEADERIMAGE_RIGHT
+; Themed check boxes ignore the text colour, so on the dark finish page their labels came out black on black.
+; Classic controls honour it. (Welcome and finish pages only; nothing else changes.)
+!define MUI_FORCECLASSICCONTROLS
 !define MUI_ABORTWARNING
 BrandingText "Room by EthicCode"
 

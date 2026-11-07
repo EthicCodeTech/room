@@ -181,6 +181,8 @@ input[type="checkbox"]:disabled { opacity: .4; cursor: not-allowed; }
 .cell.free { background: repeating-linear-gradient(135deg, var(--layer-alt) 0 8px, transparent 8px 16px); border: 1px dashed var(--stroke-strong); color: var(--muted); cursor: default; }
 .cell.lump { background: color-mix(in srgb, var(--muted) 20%, transparent) !important; color: var(--text); border: 1px dashed var(--stroke-strong); }
 .cell.lump:hover { filter: none; background: color-mix(in srgb, var(--muted) 30%, transparent) !important; }
+.drivebar { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+.drivebar .gauge { flex: 1; min-width: 160px; max-width: 360px; height: 8px; }
 .mapstatus { min-height: 22px; color: var(--muted); font-size: 13px; }
 .mapstatus b { color: var(--text); }
 .table { width: 100%; border-collapse: collapse; }
