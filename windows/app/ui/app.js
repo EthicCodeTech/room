@@ -345,7 +345,9 @@ function viewMap() {
   else if (m.mode === "list") body = mapTable();
   else body = `<div class="map" id="mapbox"></div><div class="mapstatus" id="mapstatus">${mapSummary()}</div>`;
   const sxs = /[\\/]winsxs$/i.test(mapTop().path) ? `<div class="notice">${icon("info", 18)}<div>Windows shares these files with other folders (hard links), so the sizes here look bigger than what is really used. To free space, use Windows' own cleanup rather than deleting anything in here.</div></div>` : "";
-  return `${head}<div class="crumbs">${crumbs}</div>${tools}${sxs}${body}`;
+  const drive = m.stack.length === 1 ? m.drives.find((d) => d.path.toLowerCase() === mapTop().path.toLowerCase()) : null;
+  const bar = drive ? `<div class="drivebar"><div class="gauge" role="img" aria-label="Drive usage"><i style="width:${Math.round(((drive.total - drive.free) / drive.total) * 100)}%"></i></div><span class="muted mono">${fmt(drive.total - drive.free)} used · ${fmt(drive.free)} free of ${fmt(drive.total)}</span></div>` : "";
+  return `${head}<div class="crumbs">${crumbs}</div>${tools}${bar}${sxs}${body}`;
 }
 const mapSummary = () => { const t = S.map.tree; return t ? `<b>${esc(t.name)}</b> · ${fmt(t.bytes)} in ${t.files.toLocaleString()} files${S.map.stopped ? " · stopped early, so this is partial" : ""}. Click a folder to look inside, a file to show it in Explorer.` : ""; };
 
@@ -400,14 +402,9 @@ function layoutMap() {
   const box = $("#mapbox"), t = S.map.tree;
   if (!box || !t) return;
   const W = box.clientWidth, H = box.clientHeight;
-  const top = mapTop(), drive = S.map.stack.length === 1 ? S.map.drives.find((d) => d.path.toLowerCase() === top.path.toLowerCase()) : null;
-  const items = t.children.map((c) => ({ ...c }));
-  if (drive && drive.free > 0) items.push({ name: "Free space", path: "", bytes: drive.free, kind: "free", files: 0, children: [] });
-  const cells = squarify(fitItems(items, W, H, 760, 140), W, H);
-  box.innerHTML = cells.map((c, i) => {
-    if (c.kind === "free") return `<div class="cell free" style="left:${c.x}px;top:${c.y}px;width:${c.w - 2}px;height:${c.h - 2}px;border-radius:${radius(c.w, c.h)}px" data-name="Free space" data-bytes="${c.bytes}" data-files="0"><span class="hd">Free space<small>${fmt(c.bytes)}</small></span></div>`;
-    return cellHtml(c, c.x, c.y, c.w, c.h, PALETTE[i % PALETTE.length], 0);
-  }).join("");
+  // Free space is not drawn as a block (it would waste the map); it is the thin bar above.
+  const cells = squarify(fitItems(t.children.map((c) => ({ ...c })), W, H, 760, 140), W, H);
+  box.innerHTML = cells.map((c, i) => cellHtml(c, c.x, c.y, c.w, c.h, PALETTE[i % PALETTE.length], 0)).join("");
 }
 let resizeT;
 addEventListener("resize", () => { clearTimeout(resizeT); resizeT = setTimeout(() => { placeThumbs(); if (S.view === "map") layoutMap(); }, 120); });
