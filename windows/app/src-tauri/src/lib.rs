@@ -4,7 +4,7 @@ use room_core::cleaner::{Cleaner, Confirmations, Report};
 use room_core::decision::DecisionLog;
 use room_core::discover::{discover, Options};
 use room_core::env::Env;
-use room_core::map::{self, Drive, MapNode};
+use room_core::map::{self, Drive, Place, TreeNode};
 use room_core::model::{Candidate, DeletionPolicy, Tier};
 use room_core::planner::{self, Plan};
 use room_core::scorer::{restore_rates, Scorer};
@@ -14,7 +14,8 @@ use room_core::{platform, APP_VERSION};
 use serde::{Deserialize, Serialize};
 use std::collections::HashSet;
 use std::path::{Path, PathBuf};
-use std::sync::Mutex;
+use std::sync::atomic::{AtomicBool, Ordering};
+use std::sync::{Arc, Mutex};
 use tauri::{AppHandle, Emitter, Manager, State};
 
 struct Paths { root: PathBuf }
@@ -32,6 +33,7 @@ struct AppState {
     scorer: Mutex<Scorer>,
     busy: Mutex<bool>,
     effect: Mutex<&'static str>,
+    map_cancel: Arc<AtomicBool>,
 }
 
 fn now() -> i64 { std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).map(|d| d.as_secs() as i64).unwrap_or(0) }
@@ -181,13 +183,22 @@ fn vault_empty(state: State<AppState>) -> usize {
     vault.list().iter().filter(|m| vault.purge(&m.id)).count()
 }
 
+/// One walk: the folder, what is inside it, and one more level of folders inside those.
 #[tauri::command]
-async fn map_children(path: String) -> Result<Vec<MapNode>, String> {
-    tauri::async_runtime::spawn_blocking(move || map::children(Path::new(&path), 60)).await.map_err(|e| e.to_string())
+async fn map_tree(app: AppHandle, path: String) -> Result<TreeNode, String> {
+    let flag = app.state::<AppState>().map_cancel.clone();
+    flag.store(false, Ordering::Relaxed);
+    tauri::async_runtime::spawn_blocking(move || map::tree(Path::new(&path), 2, 4000, &flag)).await.map_err(|e| e.to_string())
 }
 
 #[tauri::command]
+fn map_cancel(state: State<AppState>) { state.map_cancel.store(true, Ordering::Relaxed); }
+
+#[tauri::command]
 fn list_drives() -> Vec<Drive> { map::drives() }
+
+#[tauri::command]
+fn known_places(state: State<AppState>) -> Vec<Place> { map::places(&state.env) }
 
 #[tauri::command]
 fn home_dir(state: State<AppState>) -> String { state.env.home.to_string_lossy().to_string() }
@@ -203,6 +214,33 @@ fn reveal(path: String) {
     { let _ = std::process::Command::new("open").arg("-R").arg(p).spawn(); }
 }
 
+/// Windows paints Mica in the theme it is told. It must match the page's colours, or text turns invisible.
+#[cfg(windows)]
+fn apply_effect(window: &tauri::WebviewWindow, state: &AppState) {
+    use window_vibrancy::{apply_acrylic, apply_mica};
+    let dark = window.theme().map(|t| t == tauri::Theme::Dark).unwrap_or(true);
+    // Windows 11 gets Mica, like Settings and Explorer. Windows 10 gets acrylic. Anything else stays solid.
+    let tint = if dark { (18, 18, 20, 160) } else { (243, 243, 243, 160) };
+    let effect = if apply_mica(window, Some(dark)).is_ok() { "mica" } else if apply_acrylic(window, Some(tint)).is_ok() { "acrylic" } else { "none" };
+    if let Ok(mut e) = state.effect.lock() { *e = effect; }
+}
+
+fn parse_theme(name: &str) -> Option<tauri::Theme> {
+    match name { "light" => Some(tauri::Theme::Light), "dark" => Some(tauri::Theme::Dark), _ => None }
+}
+
+/// Applies the user's theme choice to the window itself (title bar, Mica) and returns the effect now in use.
+#[tauri::command]
+fn set_window_theme(app: AppHandle, state: State<AppState>, theme: String) -> String {
+    if let Some(w) = app.get_webview_window("main") {
+        let _ = w.set_theme(parse_theme(&theme));
+        #[cfg(windows)]
+        apply_effect(&w, &state);
+    }
+    let _ = &state;
+    state.effect.lock().map(|e| e.to_string()).unwrap_or_default()
+}
+
 pub fn run() {
     let env = Env::detect();
     let root = dirs::data_local_dir().unwrap_or_else(|| env.home.clone()).join("Room");
@@ -215,23 +253,32 @@ pub fn run() {
     Vault::new(paths.vault()).purge_expired(now());
 
     tauri::Builder::default()
-        .manage(AppState { env, paths, candidates: Mutex::new(vec![]), scorer: Mutex::new(scorer), busy: Mutex::new(false), effect: Mutex::new("none") })
+        .plugin(tauri_plugin_dialog::init())
+        .manage(AppState { env, paths, candidates: Mutex::new(vec![]), scorer: Mutex::new(scorer), busy: Mutex::new(false), effect: Mutex::new("none"), map_cancel: Arc::new(AtomicBool::new(false)) })
         .setup(|app| {
             let state = app.state::<AppState>();
-            #[cfg(windows)]
+            let saved = Settings::load(&state.paths.settings()).appearance;
             if let Some(window) = app.get_webview_window("main") {
-                use window_vibrancy::{apply_acrylic, apply_mica};
-                // Windows 11 gets Mica, like Settings and Explorer. Windows 10 gets a light acrylic. Anything else stays solid.
-                let effect = if apply_mica(&window, None).is_ok() { "mica" } else if apply_acrylic(&window, Some((18, 18, 20, 160))).is_ok() { "acrylic" } else { "none" };
-                if let Ok(mut e) = state.effect.lock() { *e = effect; }
+                let _ = window.set_theme(parse_theme(&saved));
+                #[cfg(windows)]
+                {
+                    apply_effect(&window, &state);
+                    // Follow the system when the user changes Windows between light and dark.
+                    let handle = app.handle().clone();
+                    window.on_window_event(move |event| {
+                        if let tauri::WindowEvent::ThemeChanged(_) = event {
+                            if let Some(w) = handle.get_webview_window("main") { apply_effect(&w, &handle.state::<AppState>()); }
+                        }
+                    });
+                }
             }
             #[cfg(not(windows))]
-            let _ = (&state, app.get_webview_window("main"));
+            let _ = &state;
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![
             get_overview, save_settings, scan, make_plan, preview_clean, clean, vault_list, vault_restore, vault_purge, vault_empty,
-            map_children, list_drives, home_dir, reveal
+            map_tree, map_cancel, list_drives, known_places, set_window_theme, home_dir, reveal
         ])
         .run(tauri::generate_context!())
         .expect("Room could not start");
