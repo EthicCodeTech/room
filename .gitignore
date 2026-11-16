@@ -4,3 +4,6 @@ dist/
 .DS_Store
 *.dmg
 *.zip
+
+# /brag skill output (videos, music): never commit
+brag-output*/
