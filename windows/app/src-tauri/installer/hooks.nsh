@@ -11,10 +11,14 @@
       Delete "$LOCALAPPDATA\Room\scorer-weights.json"
     ${EndIf}
     ; The vault can hold files the user deleted in the last 7 days, so uninstalling never removes it.
-    ${If} ${FileExists} "$LOCALAPPDATA\Room\Vault\*.*"
+    ; It lives in the user's profile; older builds kept it under AppData, so check both.
+    ${If} ${FileExists} "$PROFILE\.room\Vault\*.*"
+    ${OrIf} ${FileExists} "$LOCALAPPDATA\Room\Vault\*.*"
       IfSilent +2
-      MessageBox MB_OK|MB_ICONINFORMATION "Room left its undo vault where it is, because it can hold files you deleted in the last 7 days.$\r$\n$\r$\n$LOCALAPPDATA\Room\Vault$\r$\n$\r$\nDelete that folder when you no longer need them."
+      MessageBox MB_OK|MB_ICONINFORMATION "Room left its undo vault where it is, because it can hold files you deleted in the last 7 days.$\r$\n$\r$\n$PROFILE\.room\Vault$\r$\n$\r$\nDelete that folder when you no longer need them."
     ${Else}
+      RMDir "$PROFILE\.room\Vault"
+      RMDir "$PROFILE\.room"
       RMDir "$LOCALAPPDATA\Room\Vault"
       RMDir "$LOCALAPPDATA\Room"
     ${EndIf}

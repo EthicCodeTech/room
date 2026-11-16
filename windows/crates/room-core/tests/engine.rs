@@ -140,6 +140,23 @@ fn an_unplugged_drive_keeps_its_batch_until_it_is_back() {
 }
 
 #[test]
+fn an_older_vault_location_is_migrated_and_still_restores() {
+    let dir = tempfile::tempdir().unwrap();
+    let (old_vault, drive) = vault_with_drive(dir.path());
+    let f = file(dir.path(), "home/Downloads/setup.msi", 2048);
+    let (m, _) = old_vault.stash(&[item(&f)], "Installers", 7, 0).unwrap();
+    let new_vault = Vault::with_volumes(dir.path().join("home").join(".room").join("Vault"), Arc::new(FakeDrive { drive }));
+    assert_eq!(new_vault.migrate_from(&dir.path().join("app").join("Vault")), 1);
+    assert!(old_vault.list().is_empty(), "nothing is left behind in the old place");
+    let moved = new_vault.list();
+    assert_eq!(moved.len(), 1);
+    assert!(moved[0].entries[0].stored_path.contains(".room"), "stored paths follow the move");
+    new_vault.restore(&m.id).unwrap();
+    assert!(f.exists(), "the file comes back exactly where it was");
+    assert_eq!(new_vault.migrate_from(&dir.path().join("app").join("Vault")), 0, "running it again does nothing");
+}
+
+#[test]
 fn purging_removes_the_drive_copy_and_tidies_up() {
     let dir = tempfile::tempdir().unwrap();
     let (vault, drive) = vault_with_drive(dir.path());

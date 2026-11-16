@@ -108,6 +108,8 @@ impl Vault {
     pub fn stash(&self, items: &[StashItem], label: &str, days: u32, now: i64) -> Result<(Manifest, Vec<(PathBuf, String)>), VaultError> {
         let id = uuid::Uuid::new_v4().to_string();
         fs::create_dir_all(self.batch_dir(&id)).map_err(|e| VaultError::Other(e.to_string()))?;
+        platform::hide_folder(&self.dir);
+        if let Some(parent) = self.dir.parent().filter(|p| p.file_name().is_some_and(|n| n.to_string_lossy().starts_with('.'))) { platform::hide_folder(parent); }
         let mut entries = vec![];
         let mut failures = vec![];
         for (index, item) in items.iter().enumerate() {
@@ -140,6 +142,32 @@ impl Vault {
         let manifest = Manifest { id, label: label.into(), created: now, expires: now + days as i64 * 86_400, entries };
         self.write(&manifest)?;
         Ok((manifest, failures))
+    }
+
+    /// Moves batches from an older vault location into this one and fixes the paths stored inside them, so they
+    /// still restore. Returns how many batches moved. Anything that can't be moved is left where it is.
+    pub fn migrate_from(&self, old: &Path) -> usize {
+        if old == self.dir { return 0; }
+        let Ok(rd) = fs::read_dir(old) else { return 0 };
+        let _ = fs::create_dir_all(&self.dir);
+        let mut moved = 0;
+        for e in rd.flatten() {
+            let from = e.path();
+            let Some(id) = from.file_name().map(|n| n.to_string_lossy().to_string()) else { continue };
+            if !from.join("manifest.json").is_file() { continue; }
+            let to = self.batch_dir(&id);
+            if to.exists() || fs::rename(&from, &to).is_err() { continue; }
+            if let Some(mut m) = self.manifest(&id) {
+                let (a, b) = (from.to_string_lossy().to_string(), to.to_string_lossy().to_string());
+                for en in m.entries.iter_mut().filter(|en| en.volume.is_none() && en.stored_path.starts_with(&a)) {
+                    en.stored_path = en.stored_path.replacen(&a, &b, 1);
+                }
+                let _ = self.write(&m);
+            }
+            moved += 1;
+        }
+        let _ = fs::remove_dir(old); // only succeeds when empty
+        moved
     }
 
     pub fn list(&self) -> Vec<Manifest> {

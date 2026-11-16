@@ -18,9 +18,13 @@ use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::{Arc, Mutex};
 use tauri::{AppHandle, Emitter, Manager, State};
 
-struct Paths { root: PathBuf }
+struct Paths { root: PathBuf, home: PathBuf }
 impl Paths {
-    fn vault(&self) -> PathBuf { self.root.join("Vault") }
+    /// The undo vault lives in the user's profile, NOT in AppData: a Microsoft Store install treats its own AppData as
+    /// private and removes it on uninstall, which would delete files the user may still want back.
+    fn vault(&self) -> PathBuf { self.home.join(".room").join("Vault") }
+    /// Where older builds kept it.
+    fn legacy_vault(&self) -> PathBuf { self.root.join("Vault") }
     fn settings(&self) -> PathBuf { self.root.join("settings.json") }
     fn decisions(&self) -> PathBuf { self.root.join("decisions.jsonl") }
     fn model(&self) -> PathBuf { self.root.join("scorer-weights.json") }
@@ -261,13 +265,17 @@ fn set_window_theme(app: AppHandle, state: State<AppState>, theme: String) -> St
 pub fn run() {
     let env = Env::detect();
     let root = dirs::data_local_dir().unwrap_or_else(|| env.home.clone()).join("Room");
-    let paths = Paths { root };
+    let paths = Paths { root, home: env.home.clone() };
     let _ = std::fs::create_dir_all(&paths.root);
 
     let mut scorer = Scorer::new(std::fs::read_to_string(paths.model()).ok().and_then(|t| serde_json::from_str(&t).ok()));
     let history = DecisionLog::new(paths.decisions()).load();
     if !history.is_empty() { scorer.retrain(&history); }
-    Vault::new(paths.vault()).purge_expired(now());
+    {
+        let vault = Vault::new(paths.vault());
+        vault.migrate_from(&paths.legacy_vault());
+        vault.purge_expired(now());
+    }
 
     tauri::Builder::default()
         .plugin(tauri_plugin_dialog::init())

@@ -182,3 +182,6 @@ Website deploy: edit under `src/apps/room/`, `git push origin main` in `/Users/m
 - The user's Mac runs everything on macOS 26 (Tahoe, Darwin 27).
 - Windows testers: two friends on real PCs (one HP laptop, Windows 11 x64). They test unsigned builds with Smart App Control off or in evaluation mode.
 - To hand a build to testers, upload to the user's local server (section 1) or send the file directly. CI artifact names: `Room-1.2.0-x64-setup.exe`, `Room-1.2.0-x64-portable.exe`, and the `.msix` files for the Store.
+
+
+Note (2026-11-17): the central undo vault now lives in `%USERPROFILE%\\.room\\Vault`, outside AppData (migrated at startup).
