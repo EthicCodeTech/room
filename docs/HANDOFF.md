@@ -2,6 +2,10 @@
 
 Written 8 November 2026 for the next agent (another Claude account) taking over this repository. It is meant to be read top to bottom once, then used as a reference. Everything stated here was true when it was written; where something is unverified it says so.
 
+## 0a. IMPORTANT: public history was rewritten on 2026-11-17
+
+`brag-output/` (generated videos plus a third-party mp3) had been committed to the public repo, and a push also published local Android commits that were not meant to go public yet. With the owner's approval: (1) `brag-output*` was erased from **all** history of `main`, `v1.2-dev` and the `v1.0.0` tag with `git filter-repo`, and `brag-output*/` is now in `.gitignore`; (2) the Android commits were removed from the remote `v1.2-dev` (they still exist in the owner's local clone and in the backup bundle `~/Projects/room-backup-2026-11-17.bundle`, which holds the full pre-rewrite repo). All commit SHAs after the first brag-output commit changed. The `v1.0.0` release assets are unaffected. **Any older local clone has the old history: never push it.** A `pre-push` hook in the owner's local clone blocks that. To continue, re-clone, or rebase local work onto `origin` (the Android work must be re-committed on top, ideally on its own branch, and pushed only when the owner says so). GitHub may still serve the old commits by SHA until GitHub Support purges them. **Never run `git add -A` at the repo root**: add named files only.
+
 ## 0. The 60-second version
 
 - **Room** is a disk-space cleaner by **EthicCode**, built on the **Cinnabar** design system. It finds what is safe to remove, shows exactly what it will do, cleans only after approval, and keeps anything that might be the user's own in a 7-day **undo vault**.
