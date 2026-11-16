@@ -3,16 +3,13 @@
 <Package xmlns="http://schemas.microsoft.com/appx/manifest/foundation/windows10"
          xmlns:uap="http://schemas.microsoft.com/appx/manifest/uap/windows10"
          xmlns:rescap="http://schemas.microsoft.com/appx/manifest/foundation/windows10/restrictedcapabilities"
-         xmlns:desktop6="http://schemas.microsoft.com/appx/manifest/desktop/windows10/6"
-         IgnorableNamespaces="uap rescap desktop6">
+         IgnorableNamespaces="uap rescap">
   <Identity Name="EthicCodeTechnologies.RoomDiskCleaner" Publisher="CN=DE45280B-BB51-4073-8EE8-7B6468AC817A"
             Version="{{VERSION}}" ProcessorArchitecture="{{ARCH}}" />
   <Properties>
     <DisplayName>Room: Disk Cleaner</DisplayName>
     <PublisherDisplayName>EthicCode Technologies</PublisherDisplayName>
     <Logo>Assets\StoreLogo.png</Logo>
-    <!-- Room cleans other apps' folders under AppData. Without this, Windows redirects writes there to a private copy. -->
-    <desktop6:FileSystemWriteVirtualization>disabled</desktop6:FileSystemWriteVirtualization>
   </Properties>
   <Dependencies>
     <TargetDeviceFamily Name="Windows.Desktop" MinVersion="10.0.17763.0" MaxVersionTested="10.0.26100.0" />
@@ -30,6 +27,5 @@
   </Applications>
   <Capabilities>
     <rescap:Capability Name="runFullTrust" />
-    <rescap:Capability Name="unvirtualizedResources" />
   </Capabilities>
 </Package>

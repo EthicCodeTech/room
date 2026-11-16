@@ -66,10 +66,10 @@ jobs:
           New-Item -ItemType Directory -Force $layout | Out-Null
           Copy-Item "target/${{ matrix.target }}/release/room.exe" "$layout/Room.exe"
           Copy-Item -Recurse "app/src-tauri/msix/Assets" "$layout/Assets"
-          (Get-Content "app/src-tauri/msix/AppxManifest.xml" -Raw).Replace("{{ARCH}}", $arch).Replace("{{VERSION}}", "1.2.0.0") | Set-Content "$layout/AppxManifest.xml" -Encoding utf8
+          (Get-Content "app/src-tauri/msix/AppxManifest.xml" -Raw).Replace("{{ARCH}}", $arch).Replace("{{VERSION}}", "1.2.1.0") | Set-Content "$layout/AppxManifest.xml" -Encoding utf8
           $mk = (Get-ChildItem "C:\Program Files (x86)\Windows Kits\10\bin\*\x64\makeappx.exe" | Sort-Object FullName | Select-Object -Last 1).FullName
           New-Item -ItemType Directory -Force ../out | Out-Null
-          & $mk pack /d $layout /p "../out/Room-1.2.0-$arch.msix" /o
+          & $mk pack /d $layout /p "../out/Room-1.2.1-store-$arch.msix" /o
           if ($LASTEXITCODE -ne 0) { throw "makeappx failed" }
       - uses: actions/upload-artifact@v4
         with:
