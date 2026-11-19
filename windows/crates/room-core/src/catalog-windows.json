@@ -1,0 +1,443 @@
+{
+  "version": 1,
+  "rules": [
+    {
+      "id": "cache.user-temp",
+      "title": "Temporary files",
+      "why": "Scratch files apps leave behind in your Temp folder. Files used in the last hour are kept.",
+      "tier": "safe",
+      "regen": "instant",
+      "paths": [
+        "%TEMP%"
+      ],
+      "action": {
+        "type": "deleteContents"
+      },
+      "minAgeMinutes": 60
+    },
+    {
+      "id": "cache.thumbnails",
+      "title": "Thumbnail cache",
+      "why": "Explorer's picture previews. Windows builds them again the next time you open a folder.",
+      "tier": "safe",
+      "regen": "instant",
+      "paths": [
+        "%LOCALAPPDATA%\\Microsoft\\Windows\\Explorer\\thumbcache_*.db"
+      ],
+      "action": {
+        "type": "deleteItem"
+      },
+      "minAgeMinutes": 60
+    },
+    {
+      "id": "cache.crash-dumps",
+      "title": "Crash dumps",
+      "why": "Reports Windows saved when an app crashed. Only useful if you are debugging that crash.",
+      "tier": "safe",
+      "regen": "instant",
+      "paths": [
+        "%LOCALAPPDATA%\\CrashDumps"
+      ],
+      "action": {
+        "type": "deleteContents"
+      }
+    },
+    {
+      "id": "cache.edge",
+      "title": "Edge cache",
+      "why": "Page and asset caches. Sites load a little slower once. No logins or bookmarks are touched.",
+      "tier": "safe",
+      "regen": "instant",
+      "paths": [
+        "%LOCALAPPDATA%\\Microsoft\\Edge\\User Data\\*\\Cache",
+        "%LOCALAPPDATA%\\Microsoft\\Edge\\User Data\\*\\Code Cache",
+        "%LOCALAPPDATA%\\Microsoft\\Edge\\User Data\\*\\GPUCache"
+      ],
+      "action": {
+        "type": "deleteContents"
+      },
+      "guards": {
+        "appRunning": [
+          "msedge.exe"
+        ]
+      }
+    },
+    {
+      "id": "cache.chrome",
+      "title": "Chrome cache",
+      "why": "Page and asset caches. Sites load a little slower once. No logins or bookmarks are touched.",
+      "tier": "safe",
+      "regen": "instant",
+      "paths": [
+        "%LOCALAPPDATA%\\Google\\Chrome\\User Data\\*\\Cache",
+        "%LOCALAPPDATA%\\Google\\Chrome\\User Data\\*\\Code Cache",
+        "%LOCALAPPDATA%\\Google\\Chrome\\User Data\\*\\GPUCache"
+      ],
+      "action": {
+        "type": "deleteContents"
+      },
+      "guards": {
+        "appRunning": [
+          "chrome.exe"
+        ]
+      }
+    },
+    {
+      "id": "cache.brave",
+      "title": "Brave cache",
+      "why": "Page and asset caches. Sites load a little slower once. No logins or bookmarks are touched.",
+      "tier": "safe",
+      "regen": "instant",
+      "paths": [
+        "%LOCALAPPDATA%\\BraveSoftware\\Brave-Browser\\User Data\\*\\Cache",
+        "%LOCALAPPDATA%\\BraveSoftware\\Brave-Browser\\User Data\\*\\Code Cache"
+      ],
+      "action": {
+        "type": "deleteContents"
+      },
+      "guards": {
+        "appRunning": [
+          "brave.exe"
+        ]
+      }
+    },
+    {
+      "id": "cache.firefox",
+      "title": "Firefox cache",
+      "why": "Page and asset caches. Sites load a little slower once. No logins or bookmarks are touched.",
+      "tier": "safe",
+      "regen": "instant",
+      "paths": [
+        "%LOCALAPPDATA%\\Mozilla\\Firefox\\Profiles\\*\\cache2"
+      ],
+      "action": {
+        "type": "deleteContents"
+      },
+      "guards": {
+        "appRunning": [
+          "firefox.exe"
+        ]
+      }
+    },
+    {
+      "id": "cache.discord",
+      "title": "Discord cache",
+      "why": "Images and files Discord saved to load chats faster. It downloads them again when needed.",
+      "tier": "safe",
+      "regen": "instant",
+      "paths": [
+        "%APPDATA%\\discord\\Cache",
+        "%APPDATA%\\discord\\Code Cache",
+        "%APPDATA%\\discord\\GPUCache"
+      ],
+      "action": {
+        "type": "deleteContents"
+      },
+      "guards": {
+        "appRunning": [
+          "discord.exe"
+        ]
+      }
+    },
+    {
+      "id": "cache.slack",
+      "title": "Slack cache",
+      "why": "Images and files Slack saved to load faster. It downloads them again when needed.",
+      "tier": "safe",
+      "regen": "instant",
+      "paths": [
+        "%APPDATA%\\Slack\\Cache",
+        "%APPDATA%\\Slack\\Code Cache",
+        "%APPDATA%\\Slack\\GPUCache"
+      ],
+      "action": {
+        "type": "deleteContents"
+      },
+      "guards": {
+        "appRunning": [
+          "slack.exe"
+        ]
+      }
+    },
+    {
+      "id": "cache.vscode",
+      "title": "VS Code cache",
+      "why": "Cached code and extension data. VS Code rebuilds it the next time it starts.",
+      "tier": "safe",
+      "regen": "instant",
+      "paths": [
+        "%APPDATA%\\Code\\Cache",
+        "%APPDATA%\\Code\\CachedData",
+        "%APPDATA%\\Code\\Code Cache",
+        "%APPDATA%\\Code\\GPUCache"
+      ],
+      "action": {
+        "type": "deleteContents"
+      },
+      "guards": {
+        "appRunning": [
+          "code.exe"
+        ]
+      }
+    },
+    {
+      "id": "cache.spotify",
+      "title": "Spotify cache",
+      "why": "Songs Spotify saved so they play without buffering. It downloads them again when needed.",
+      "tier": "safe",
+      "regen": "instant",
+      "paths": [
+        "%LOCALAPPDATA%\\Spotify\\Data"
+      ],
+      "action": {
+        "type": "deleteContents"
+      },
+      "guards": {
+        "appRunning": [
+          "spotify.exe"
+        ]
+      }
+    },
+    {
+      "id": "cache.shaders",
+      "title": "Graphics shader cache",
+      "why": "Compiled graphics code for games and apps. Rebuilt the next time you run them, so the first launch may stutter once.",
+      "tier": "safe",
+      "regen": "minutes",
+      "paths": [
+        "%LOCALAPPDATA%\\D3DSCache",
+        "%LOCALAPPDATA%\\NVIDIA\\DXCache",
+        "%LOCALAPPDATA%\\NVIDIA\\GLCache",
+        "%LOCALAPPDATA%\\AMD\\DxCache"
+      ],
+      "action": {
+        "type": "deleteContents"
+      },
+      "personas": [
+        "gaming",
+        "gamedev",
+        "3d"
+      ]
+    },
+    {
+      "id": "cache.npm",
+      "title": "npm cache",
+      "why": "Packages npm downloaded before. It fetches them again when a project needs them.",
+      "tier": "safe",
+      "regen": "minutes",
+      "paths": [
+        "%LOCALAPPDATA%\\npm-cache"
+      ],
+      "action": {
+        "type": "command",
+        "id": "npmCacheClean"
+      },
+      "personas": [
+        "dev",
+        "data"
+      ]
+    },
+    {
+      "id": "cache.uv",
+      "title": "uv cache",
+      "why": "Python packages uv downloaded before. It fetches them again when needed.",
+      "tier": "safe",
+      "regen": "minutes",
+      "paths": [
+        "%LOCALAPPDATA%\\uv\\cache"
+      ],
+      "action": {
+        "type": "command",
+        "id": "uvCacheClean"
+      },
+      "personas": [
+        "dev",
+        "data"
+      ]
+    },
+    {
+      "id": "cache.pip",
+      "title": "pip cache",
+      "why": "Python packages pip downloaded before. It fetches them again when needed.",
+      "tier": "safe",
+      "regen": "minutes",
+      "paths": [
+        "%LOCALAPPDATA%\\pip\\Cache"
+      ],
+      "action": {
+        "type": "deleteContents"
+      },
+      "personas": [
+        "dev",
+        "data"
+      ]
+    },
+    {
+      "id": "cache.nuget-http",
+      "title": "NuGet download cache",
+      "why": "Package downloads NuGet kept. It fetches them again when needed.",
+      "tier": "safe",
+      "regen": "minutes",
+      "paths": [
+        "%LOCALAPPDATA%\\NuGet\\v3-cache"
+      ],
+      "action": {
+        "type": "deleteContents"
+      },
+      "personas": [
+        "dev",
+        "gamedev"
+      ]
+    },
+    {
+      "id": "cache.gradle",
+      "title": "Gradle caches",
+      "why": "Libraries Gradle downloaded for Android and Java builds. The next build downloads them again, which can take a while.",
+      "tier": "rebuildable",
+      "regen": "hours",
+      "paths": [
+        "~\\.gradle\\caches"
+      ],
+      "action": {
+        "type": "deleteContents"
+      },
+      "personas": [
+        "dev",
+        "mobile",
+        "gamedev"
+      ]
+    },
+    {
+      "id": "cache.cargo",
+      "title": "Cargo download cache",
+      "why": "Rust crates Cargo downloaded. The next build downloads them again.",
+      "tier": "rebuildable",
+      "regen": "minutes",
+      "paths": [
+        "~\\.cargo\\registry\\cache",
+        "~\\.cargo\\registry\\src"
+      ],
+      "action": {
+        "type": "deleteContents"
+      },
+      "personas": [
+        "dev"
+      ]
+    },
+    {
+      "id": "cache.unity",
+      "title": "Unity cache",
+      "why": "Imported assets and package caches. Unity rebuilds them when you open a project.",
+      "tier": "rebuildable",
+      "regen": "hours",
+      "paths": [
+        "%LOCALAPPDATA%\\Unity\\cache",
+        "%APPDATA%\\Unity\\Asset Store-5.x"
+      ],
+      "action": {
+        "type": "deleteContents"
+      },
+      "personas": [
+        "gamedev"
+      ]
+    },
+    {
+      "id": "cache.premiere-media",
+      "title": "Premiere media cache",
+      "why": "Previews and conformed audio Premiere made. It rebuilds them when you reopen a project, which can take a while.",
+      "tier": "rebuildable",
+      "regen": "hours",
+      "paths": [
+        "%APPDATA%\\Adobe\\Common\\Media Cache Files",
+        "%APPDATA%\\Adobe\\Common\\Media Cache",
+        "%APPDATA%\\Adobe\\Common\\Peak Files"
+      ],
+      "action": {
+        "type": "deleteContents"
+      },
+      "personas": [
+        "video"
+      ],
+      "guards": {
+        "appRunning": [
+          "Adobe Premiere Pro.exe",
+          "AfterFX.exe",
+          "Adobe Media Encoder.exe"
+        ]
+      }
+    },
+    {
+      "id": "cache.davinci",
+      "title": "DaVinci Resolve cache",
+      "why": "Optimized media and render cache. Resolve rebuilds them when you play or render again.",
+      "tier": "rebuildable",
+      "regen": "hours",
+      "paths": [
+        "%APPDATA%\\Blackmagic Design\\DaVinci Resolve\\Support\\CacheClip",
+        "%APPDATA%\\Blackmagic Design\\DaVinci Resolve\\Support\\Resolve Disk Database\\CacheClip"
+      ],
+      "action": {
+        "type": "deleteContents"
+      },
+      "personas": [
+        "video"
+      ],
+      "guards": {
+        "appRunning": [
+          "Resolve.exe"
+        ]
+      }
+    },
+    {
+      "id": "cache.lightroom",
+      "title": "Lightroom previews cache",
+      "why": "Preview images Lightroom made. Your photos and catalog are not touched. It builds previews again as you browse.",
+      "tier": "rebuildable",
+      "regen": "hours",
+      "paths": [
+        "%LOCALAPPDATA%\\Adobe\\Lightroom\\Caches",
+        "%APPDATA%\\Adobe\\CameraRaw\\Cache"
+      ],
+      "action": {
+        "type": "deleteContents"
+      },
+      "personas": [
+        "photo"
+      ],
+      "guards": {
+        "appRunning": [
+          "Lightroom.exe",
+          "Photoshop.exe"
+        ]
+      }
+    },
+    {
+      "id": "cache.huggingface",
+      "title": "Hugging Face model cache",
+      "why": "AI models downloaded for your projects. They download again when a project needs them, which can be large.",
+      "tier": "rebuildable",
+      "regen": "hours",
+      "paths": [
+        "~\\.cache\\huggingface\\hub"
+      ],
+      "action": {
+        "type": "deleteContents"
+      },
+      "personas": [
+        "data"
+      ]
+    },
+    {
+      "id": "system.recycle-bin",
+      "title": "Recycle Bin",
+      "why": "Files you already deleted. Emptying it is permanent, so check it first.",
+      "tier": "yours",
+      "regen": "never",
+      "paths": [],
+      "action": {
+        "type": "command",
+        "id": "emptyRecycleBin"
+      }
+    }
+  ]
+}
